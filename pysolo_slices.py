@@ -466,7 +466,7 @@ class DAMslice(object):
         if not useFilter: min_alive, max_alive = 0, 1440
 
         fly_alive_through = ((fly5_slice.sum(axis=2) > min_alive) & (fly5_slice.sum(axis=2) < max_alive)) #shape = (f,d)
-
+        
         if use_dropout:
             # If we decided to use the dropout we at least have to change their value to NaN
             # after they died so that they are not going to be included in our averages
@@ -476,9 +476,9 @@ class DAMslice(object):
             # If we don't want to use the dropouts we completely get rid of the data for
             # those flies as they never existed ,masking it
             mask_do = np.zeros(fly_alive_through.shape, dtype = np.bool)
-            fly_alive_through_by_row = fly_alive_through.all(axis=0)
+            fly_alive_through_by_row = fly_alive_through.all(axis=0) #for each fly check if there is at least a day beyond limits
             indices = np.where(fly_alive_through_by_row == False)
-            mask_do[indices] = True
+            mask_do[:,indices] = True
 
         # Now we get rid of the flies we don't want because they are not in the Status
         # we asked for. All those flies will be NaN

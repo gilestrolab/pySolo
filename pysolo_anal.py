@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 import wx, os
 from pysolo_path import panelPath, imgPath
 os.sys.path.append(panelPath)
@@ -382,7 +381,7 @@ class NavigationTree(CT.CustomTreeCtrl):
 
     def __init__(self, parent):
 
-        CT.CustomTreeCtrl.__init__(self, parent, ctstyle= wx.TR_MULTIPLE |
+        CT.CustomTreeCtrl.__init__(self, parent, style= wx.TR_MULTIPLE |
                                                  wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_DEFAULT_STYLE )
         self.parent = parent
         self.KeyDown = ''
