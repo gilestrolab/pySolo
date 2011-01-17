@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 # ####################################################################
 #   Version 0.7
-#   Last modification to this code
-#   on 2011/01/15
 #   Versions now handled in version control
 #
 #   Before using, modify the variables in the copyfiles_config.py file
@@ -136,7 +134,6 @@ def processFile(inFile, outFile):
         previousTime = startTime - datetime.timedelta(minutes=1)
 
         with open(inFile, 'rU') as inputfile:      #open the file for reading as inputfile U is for universal mode  - will work with Mac file
-            #monData = inputfile.read()     #read contents of the file as a list of lines (strings)
 
             for singleLine in inputfile: #goes through the file line by line
                 line = singleLine.split('\t')   #split contents by tabs
@@ -238,7 +235,11 @@ def processFile(inFile, outFile):
 args = sys.argv
 #show some helpful message through the commandline
 if args.count('-h') or args.count('--help'):
-    print 'Use without parameters to fetch yesterday\'s data\nor use "copyfiles -d year-mm-dd"\nto fetch data from a given day'
+    print ('''Usage: copyfiles [-d date] [-i path]\n\
+    no options\t\t\tfetch yesterday\'s data with settings specified in config file\n\
+    -d year-mm-dd\t\tfetch data for specified date\n\
+    -i path\t\t\tuse specified path as inputpath\n\
+        ''')
     exit()
 
 #First get the date to be processed, either automatically (=yesterday) or through the commandline
@@ -256,11 +257,14 @@ if args.count('-d'):
     print year,month,day
     startTime = datetime.datetime(year,month,day,startHour,startMinute,00)
 
+
+#Use provided path instead of the one specified in the config file
 if args.count('-i'):
     i = args.index('-i') + 1
-    filename = args[i]
-    if os.path_exists(filename):
-        print 'Using input file %s' % s
+    pathname = args[i]
+    if os.path.exists(pathname):
+        print 'Using input directory %s' % s
+        inputPath = pathname
 
 #''' Do things here '''
 
