@@ -28,7 +28,8 @@ class VirtualCam(object):
         
         #what is the path for the arial and arialbd fonts in mac?
         if 'linux' in platform: #linux
-            self.normalfont = ImageFont.truetype('/usr/share/fonts/truetype/msttcorefonts/arial.ttf', 12)
+            #self.normalfont = ImageFont.truetype('/usr/share/fonts/truetype/msttcorefonts/arial.ttf', 12)
+            self.normalfont = ImageFont.truetype('/usr/share/fonts/TTF/arial.ttf', 12)
         elif 'darwin' in platform: #macos
             self.normalfont = ImageFont.truetype('/Library/Fonts/ArialHB.ttf', 12)
         else: #windows
@@ -78,8 +79,6 @@ class VirtualCam(object):
         except:
             print 'error with image %s' % fp
             raise
-        ##from opencv import highgui
-        ##im = highgui.cvLoadImage(fp)
 
         if timestamp:
             width, height = self.resolution
@@ -157,7 +156,7 @@ class VirtualCam(object):
             self.currentFrame = 0
             return False
         else:
-            return False
+            return False #go,go,go
             
     
     def getResolution(self):
@@ -271,6 +270,18 @@ class Monitor(object):
         '''
         if self.isVirtualCam:
             return self.cam.isLastFrame()
+        else:
+            return False
+    
+    def SetLoop(self,loop):
+        '''
+        Set Loop on or off.
+        Should work only in virtual cam mode
+        Return current loopmode
+        '''
+        if self.isVirtualCam:
+            self.cam.loop = loop
+            return self.cam.loop
         else:
             return False
     

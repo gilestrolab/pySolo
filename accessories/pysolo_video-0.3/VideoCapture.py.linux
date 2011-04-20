@@ -2,14 +2,14 @@
 ##Linux alternative to the WIN32 VideoCapture
 ##Requires opencv
 
-import time, opencv
+import time, cv
 from PIL import ImageFont, ImageChops
 from ImageDraw import Draw
-from opencv import highgui
+#from cv import highgui
 
 class Device(object):
     def __init__(self, devnum=0, showVideoWindow=0):
-        self.camera = highgui.cvCreateCameraCapture(devnum)
+        self.camera = cv.CreateCameraCapture(devnum)
         
         #self.normalfont = ImageFont.load_default()
         #self.boldfont = ImageFont.load_default()
@@ -24,8 +24,8 @@ class Device(object):
         x = float(x)
         y = float(y)
         self.resolution = (x, y)
-        highgui.cvSetCaptureProperty(self.camera, highgui.CV_CAP_PROP_FRAME_WIDTH, x)
-        highgui.cvSetCaptureProperty(self.camera, highgui.CV_CAP_PROP_FRAME_HEIGHT, y)
+        cv.SetCaptureProperty(self.camera, cv.CV_CAP_PROP_FRAME_WIDTH, x)
+        cv.SetCaptureProperty(self.camera, cv.CV_CAP_PROP_FRAME_HEIGHT, y)
         #x,y = highgui.cvGetCaptureProperty(self.camera, highgui.CV_CAP_PROP_FRAME_WIDTH), highgui.cvGetCaptureProperty(self.camera, highgui.CV_CAP_PROP_FRAME_HEIGHT)
         #print x,y
 
@@ -55,7 +55,7 @@ class Device(object):
 
         """
 
-        im = highgui.cvQueryFrame(self.camera)
+        im = cv.QueryFrame(self.camera)
 
         #onlyRed = False
         #if onlyRed:

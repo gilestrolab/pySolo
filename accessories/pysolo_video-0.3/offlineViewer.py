@@ -94,7 +94,7 @@ def offlineViewer(vc, mask_name, resize_mask=((960,720),(960,720)), crop_way=(0,
 
     mon1.SetUseAverage(False)
     mon1.SetThreshold(75) #threshold value used to calculate position of the fly
-    mon1.loop = loop
+    mon1.SetLoop(True)
     
     fps = 30.0
     pygame.init()
@@ -139,15 +139,15 @@ def offlineViewer(vc, mask_name, resize_mask=((960,720),(960,720)), crop_way=(0,
 if __name__ == '__main__':
 
     #where are the images we want to create the mask for?
-    path = 'C:/sleepData/videoData/2009/03/0318'
+    #path = 'C:/sleepData/videoData/2009/03/0318'
     #path = '/data/moredata/Video/2009/02/0219'
-    #path = '/data/Work/pysolo/support/related_stuff/pysolo_video'
+    path = '/home/gg/Desktop/reflydetection/'
 
 
     #enter mask name. If the mask exists will be loaded and used
     #else, it will be created
     mask_name = 'default.mask'
-    resize_mask = ((640,480), (640,480))
+    resize_mask = ((800,600), (800,600))
 
     #method to be used when adding new crop areas 
     #crop_way = (0,0) ## The new area is defined using the mouse and select a rectangle
@@ -156,5 +156,5 @@ if __name__ == '__main__':
     
     vc = [path, None, None, None] #step, start, end
     
-    offlineViewer(vc, mask_name, resize_mask, crop_way, loop=True)
-    #offlineProcessor(vc, mask_name, resize_mask, crop_way)
+    #offlineViewer(vc, mask_name, resize_mask, crop_way, loop=True)
+    offlineProcessor(vc, mask_name, resize_mask, crop_way)
