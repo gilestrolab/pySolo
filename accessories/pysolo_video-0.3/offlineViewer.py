@@ -126,7 +126,7 @@ def offlineViewer(vc, mask_name, resize_mask=((960,720),(960,720)), crop_way=(0,
         #im = mon1.GetImage(draw_crop = True, timestamp = 2)
         
         ## Shows the image with the fly position
-        mon1.GetDiffImg(draw_crop = False, timestamp = 2)
+        mon1.GetDiffImg(draw_crop = False)
         im = mon1.DrawXYAllFlies(use_diff = False, draw_crop = True)
 
         pg_img = pygame.image.frombuffer(im.tostring(), im.size, im.mode)

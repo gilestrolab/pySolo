@@ -1,11 +1,14 @@
 #!/usr/bin/env python
-from VideoCapture import Device
+# Works using opencv
+# Dropped requirement for pygame
+
+import cv
+
 import numpy as np
 from scipy.misc import fromimage, toimage
 from scipy.cluster import vq
 
 from ImageDraw import Draw
-#import ImageChops
 from PIL import ImageFont, Image, ImageChops
 
 import os, sys, datetime, time
@@ -13,9 +16,43 @@ from sys import platform
 
 import cPickle
 
+class RealCam(object):
+    def __init__(self, devnum=0, showVideoWindow=0):
+        self.camera = cv.CaptureFromCAM(devnum)
+        
+        self.normalfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
+        self.boldfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
+        self.font = None
+
+
+    def setResolution(self, x, y):
+        '''
+        Set resolution of the camera we are aquiring from
+        '''
+        x = float(x); y = float(y)
+        self.resolution = (x, y)
+        cv.SetCaptureProperty(self.camera, cv.CV_CAP_PROP_FRAME_WIDTH, x)
+        cv.SetCaptureProperty(self.camera, cv.CV_CAP_PROP_FRAME_HEIGHT, y)
+
+    def getImage(self, timestamp=False, PIL=True):
+        '''
+        Returns an image
+        '''
+
+        im = cv.QueryFrame(self.camera)
+        if PIL:
+            im = Image.fromstring("RGB", cv.GetSize(im), im.tostring()) # Convert to PIL see was http://www.depthfirstsearch.net/blog/2008/09/22/opencv-and-python/
+        
+        return im
+
+    def saveSnapshot(self, filename, quality=90, **args):
+        img = self.getImage(**args)
+        img.save(filename, quality=quality)
+
+
 class VirtualCam(object):
     '''
-        A Virtual cam to be used to pick images from a folder rather than a webcam
+    A Virtual cam to be used to pick images from a folder rather than a webcam
     '''
     def __init__(self, path, step = None, start = None, end = None):
         self.path = path
@@ -26,17 +63,9 @@ class VirtualCam(object):
         fp = os.path.join(self.path, self.fileList[0])
         self.resolution = Image.open(fp).size
         
-        #what is the path for the arial and arialbd fonts in mac?
-        if 'linux' in platform: #linux
-            #self.normalfont = ImageFont.truetype('/usr/share/fonts/truetype/msttcorefonts/arial.ttf', 12)
-            self.normalfont = ImageFont.truetype('/usr/share/fonts/TTF/arial.ttf', 12)
-        elif 'darwin' in platform: #macos
-            self.normalfont = ImageFont.truetype('/Library/Fonts/ArialHB.ttf', 12)
-        else: #windows
-            self.normalfont = ImageFont.truetype('C:\\Windows\\fonts\\arial.ttf', 12)
-
+        self.normalfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
+        self.boldfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
         self.font = None
-
 
     def __getFileTime__(self, fname):
         '''
@@ -44,31 +73,13 @@ class VirtualCam(object):
         '''
         return os.stat(fname)[-2]
 
-    def getImage(self, timestamp=0, boldfont=0, textpos='bl'):
-        """Returns a PIL Image instance.
+    def getImage(self, timestamp=False):
+        '''
+        Returns a PIL Image instance.
 
         timestamp:  0 ... no timestamp (the default)
                     1 ... simple timestamp
-                    2 ... timestamp with shadow
-                    3 ... timestamp with outline
-
-        boldfont:   0 ... normal font (the default)
-                    1 ... bold font
-
-        textpos:    The position of the timestamp can be specified by a string
-                    containing a combination of two characters.  One character
-                    must be either t or b, the other one either l, c or r.
-
-                    t ... top
-                    b ... bottom
-
-                    l ... left
-                    c ... center
-                    r ... right
-
-                    The default value is 'bl'
-
-        """
+        '''
         n = self.currentFrame
         fp = os.path.join(self.path, self.fileList[n])
 
@@ -82,49 +93,14 @@ class VirtualCam(object):
 
         if timestamp:
             width, height = self.resolution
+            x = 0.97 * width
+            y = 0.97 * height
             textcolor = 0xffffff
-            shadowcolor = 0x000000
 
             fileTime = self.__getFileTime__(fp)
             text = time.asctime(time.localtime(fileTime))
 
-            if boldfont:
-                self.font = self.boldfont
-            else:
-                self.font = self.normalfont
-            tw, th = self.font.getsize(text)
-            tw -= 2
-            th -= 2
-            if 't' in textpos:
-                y = -1
-            elif 'b' in textpos:
-                y = height - th - 2
-            else:
-                raise ValueError, "textpos must contain exactly one out of 't', 'b'"
-            if 'l' in textpos:
-                x = 2 
-            elif 'c' in textpos:
-                x = (width - tw) / 2
-            elif 'r' in textpos:
-                x = (width - tw) - 2
-            else:
-                raise ValueError, "textpos must contain exactly one out of 'l', 'c', 'r'"
             draw = Draw(im)
-            if timestamp == 2: # shadow
-                draw.text((x+1, y), text, font=self.font, fill=shadowcolor)
-                draw.text((x, y+1), text, font=self.font, fill=shadowcolor)
-                draw.text((x+1, y+1), text, font=self.font, fill=shadowcolor)
-            else:
-                if timestamp >= 3: # thin border
-                    draw.text((x-1, y), text, font=self.font, fill=shadowcolor)
-                    draw.text((x+1, y), text, font=self.font, fill=shadowcolor)
-                    draw.text((x, y-1), text, font=self.font, fill=shadowcolor)
-                    draw.text((x, y+1), text, font=self.font, fill=shadowcolor)
-                if timestamp == 4: # thick border
-                    draw.text((x-1, y-1), text, font=self.font, fill=shadowcolor)
-                    draw.text((x+1, y-1), text, font=self.font, fill=shadowcolor)
-                    draw.text((x-1, y+1), text, font=self.font, fill=shadowcolor)
-                    draw.text((x+1, y+1), text, font=self.font, fill=shadowcolor)
             draw.text((x, y), text, font=self.font, fill=textcolor)
         
         return im
@@ -156,7 +132,7 @@ class VirtualCam(object):
             self.currentFrame = 0
             return False
         else:
-            return False #go,go,go
+            return False
             
     
     def getResolution(self):
@@ -194,17 +170,22 @@ class Monitor(object):
     """
 
     def __init__(self, devnum=0, resolution=(800,600), virtual_cam = None ):
+        '''
+        A Monitor contains a cam, which can be either virtual or real.
+        Real CAMs are handled through opencv.
+        '''
+
         if virtual_cam:
             self.cam = VirtualCam(path=virtual_cam[0], step=virtual_cam[1], start = virtual_cam[2], end = virtual_cam[3])
             resolution = self.cam.getResolution()
             self.numberOfFrames = len(self.cam.fileList)
-            self.isVirtualCam = True
         else:
-            self.cam = Device(devnum=devnum)
+            self.cam = RealCam(devnum=devnum)
             self.cam.setResolution(*resolution)
             self.numberOfFrames = 0
-            self.isVirtualCam = False
+        
 
+        self.isVirtualCam = virtual_cam
         self.resolution = resolution
 
         self.use_average = False
@@ -231,7 +212,7 @@ class Monitor(object):
 
     def __getOnlyChannel__(self, img, channel='R'):
         '''
-        Return only the asked channel
+        Return only the asked channel R,G or B
         '''
         channel = 'RGB'.find(channel.upper())
         source = img.split()
@@ -352,10 +333,14 @@ class Monitor(object):
         '''
         Load the crop data from a file
         '''
-        cf = open(filename, 'r')
-        self.all_coords = cPickle.load(cf)
-        self.points_to_track = cPickle.load(cf)
-        cf.close()
+        try:
+            cf = open(filename, 'r')
+            self.all_coords = cPickle.load(cf)
+            self.points_to_track = cPickle.load(cf)
+            cf.close()
+            return True
+        except:
+            return False
 
     def resizeCrop(self, origSize, newSize):
         '''
@@ -392,8 +377,6 @@ class Monitor(object):
         '''
         return self.points_to_track
 
-
-
     def GetImage(self, draw_crop = False, **keywords):
         '''
         GetImage(self, draw_crop = False, timestamp=0, boldfont=0, textpos='bl')
@@ -406,7 +389,7 @@ class Monitor(object):
         if self.use_average and self.calculating_average:
             self.avg_array += fromimage(self.lastImg, flatten = False)
             self.__n += 1
-    	    if self.__n == self.avg_frame_num:
+            if self.__n == self.avg_frame_num:
                 self.avgImg = toimage(self.avg_array / self.__n)
                 del self.avg_array
                 self.calculating_average = False
@@ -437,6 +420,7 @@ class Monitor(object):
             diff = self.lastImg
 
         self.diffImg = ImageChops.subtract(self.GetImage(**keywords), diff)
+        
 
         #Do we want to draw the cropped area?
         if draw_crop:
@@ -506,7 +490,7 @@ class Monitor(object):
         points = self.__white_points__(imA, self.threshold)
 
         if len(points) > 0:
-            codebook, distortion = vq.kmeans(points, ptt)
+            codebook, distortion = vq.kmeans(points, ptt) #http://en.wikipedia.org/wiki/Vector_quantization
             for p in codebook:
                 x, y = int(p[0]), int(p[1])
                 coords.append((x, y))
