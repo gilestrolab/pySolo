@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-# Works using opencv
-# Dropped requirement for pygame
+#    http://stackoverflow.com/questions/3923906/kmeans-in-opencv-python-interface
+
 
 import cv
 
@@ -16,14 +16,50 @@ from sys import platform
 
 import cPickle
 
-class RealCam(object):
-    def __init__(self, devnum=0, showVideoWindow=0):
+
+        
+class realCam:
+    '''
+    a realCam class will handle a webcam connected to the system
+    camera is handled through opencv and images can be transformed to PIL
+    '''
+    def __init__(self, devnum=0, showVideoWindow=False, resolution=(640,480)):
         self.camera = cv.CaptureFromCAM(devnum)
+        self.grabMovie = False
+        self.setResolution (*resolution)
         
         self.normalfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
         self.boldfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
         self.font = None
 
+    def __addTimestamp__(self, im, PIL):
+        '''
+        Add current time as stamp to the image
+        '''
+
+        width, height = self.resolution
+        x = 10
+        y = height - 15
+        textcolor = 0xffffff
+        
+        text = time.asctime(time.localtime(time.time()))
+
+        if PIL:
+            draw = Draw(im)
+            draw.text((x, y), text, font=self.font, fill=textcolor)
+        
+        else:
+            cv.PutText(im, text, (x, y), self.font, textcolor)
+        
+        return im
+       
+
+
+    def getResolution(self):
+        '''
+        Return current resolution
+        '''
+        return self.resolution
 
     def setResolution(self, x, y):
         '''
@@ -38,29 +74,188 @@ class RealCam(object):
         '''
         Returns an image
         '''
-
         im = cv.QueryFrame(self.camera)
-        if PIL:
-            im = Image.fromstring("RGB", cv.GetSize(im), im.tostring()) # Convert to PIL see was http://www.depthfirstsearch.net/blog/2008/09/22/opencv-and-python/
+        
+        if self.grabMovie: cv.WriteFrame(self.writer, im)       
+
+        if PIL: im = Image.fromstring("RGB", cv.GetSize(im), im.tostring()) # Convert to PIL see was http://www.depthfirstsearch.net/blog/2008/09/22/opencv-and-python/
+        
+        if timestamp: im = self.__addTimestamp__(im, PIL)
         
         return im
+
+    def saveMovie(self, filename, fps=24):
+        '''
+        Experimental
+        '''
+        self.fps = fps
+        fourcc = cv.CV_FOURCC('I','4','2','0')  # uncompressed YUV 4:2:0 chroma subsampled
+
+        self.writer = cv.CreateVideoWriter(filename, fourcc, self.fps, self.resolution, 1)
+        self.grabMovie = True
+        
+        #for i in range(90):
+            #cv.GrabFrame(cap); frame = cv.RetrieveFrame(cap)
+            #cv.WriteFrame(writer, frame)
 
     def saveSnapshot(self, filename, quality=90, **args):
         img = self.getImage(**args)
         img.save(filename, quality=quality)
 
+class virtualCamMovie:
+    '''
+    A Virtual cam to be used to pick images from a movie (avi, mov) rather than a real webcam
+    Images are handled through opencv
+    '''
+    def __init__(self, path, step = None, start = None, end = None, loop=False):
+        '''
+        Specifies some of the parameters for working with the movie:
+        
+            path        the path to the file
+            
+            step        distance between frames. If None, set 1
+            
+            start       start at frame. If None, starts at first
+            
+            end         end at frame. If None, ends at last
+            
+            loop        False   (Default)   Does not playback movie in a loop
+                        True                Playback in a loop
+        
+        '''
+        self.path = path
+        
+        if start < 0: start = 0
+        self.start = start or 0
+        self.currentFrame = self.start
 
-class VirtualCam(object):
+        self.step = step or 1
+        if self.step < 1: self.step = 1
+        
+        self.loop = loop
+
+        self.capture = cv.CaptureFromFile(self.path)
+
+        w = cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_WIDTH)
+        h = cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_FRAME_HEIGHT)
+        self.in_resolution = (int(w), int(h))
+        self.resolution = self.in_resolution
+
+        self.totalFrames = cv.GetCaptureProperty( self.capture , cv.CV_CAP_PROP_FRAME_COUNT )
+        if end < 1 or end > self.totalFrames: end = self.totalFrames
+        self.lastFrame = end
+        
+        self.normalfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
+        self.boldfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 3, 8)
+        self.font = None
+        self.scale = False
+        
+    def __getFrameTime__(self):
+        '''
+        Return the time of the frame
+        '''
+        
+        fileTime = cv.GetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_MSEC)
+   
+        return '%s - %s/%s' % (fileTime, self.currentFrame, self.totalFrames) #time.asctime(time.localtime(fileTime))
+
+    def __addTimestamp__(self, im, text, PIL):
+        '''
+        Add a text to the image
+        '''
+        width, height = self.resolution
+        x = 10
+        y = height - 15
+        textcolor = 0xffffff
+
+        if PIL:
+            draw = Draw(im)
+            draw.text((x, y), text, font=self.font, fill=textcolor)
+        
+        else:
+            cv.PutText(im, text, (x, y), self.font, textcolor)
+        
+        return im
+    
+    def getImage(self, timestamp=False, PIL=True):
+        '''
+        Returns frame
+        
+        timestamp   False   (Default) Does not add timestamp
+                    True              Add timestamp to the image
+                    
+        PIL         True    (Default) Returns a PIL image
+                    False             Returns a cv (IPL) image
+        '''
+
+        if not self.isLastFrame():
+            #cv.SetCaptureProperty(self.capture, cv.CV_CAP_PROP_POS_FRAMES, self.currentFrame) # this does not work
+            im = cv.QueryFrame(self.capture)
+            self.currentFrame += self.step
+            
+        #elif self.currentFrame > self.lastFrame and not self.loop: return False
+
+        if self.scale:
+            newsize = cv.CreateMat(self.resolution[0], self.resolution[1], cv.CV_8UC3)
+            cv.Resize(im, newsize)
+
+        if PIL:
+            im = Image.fromstring("RGB", cv.GetSize(im), im.tostring()) # Convert to PIL see was http://www.depthfirstsearch.net/blog/2008/09/22/opencv-and-python/
+
+        if timestamp:
+            text = self.__getFrameTime__()
+            im = self.__addTimestamp__(im, text, PIL)
+        
+        return im
+
+    def setResolution(self, w, h):
+        '''
+        Changes the output resolution
+        '''
+        self.resolution = (w, h)
+        self.scale = (self.resolution != self.in_resolution)
+    
+    def getResolution(self):
+        '''
+        Returns frame resolution as tuple (w,h)
+        '''
+        return self.resolution
+        
+    def getTotalFrames(self):
+        '''
+        Returns total number of frames
+        '''
+        return self.totalFrames
+
+    def isLastFrame(self):
+        '''
+        Are we processing the last frame in the movie?
+        '''
+
+        if ( self.currentFrame > self.totalFrames ) and not self.loop:
+            return True
+        elif ( self.currentFrame == self.totalFrames ) and self.loop:
+            self.currentFrame = self.start
+            return False
+        else:
+            return False
+
+
+class virtualCamFrames:
     '''
     A Virtual cam to be used to pick images from a folder rather than a webcam
+    Images are handled through PIL
     '''
-    def __init__(self, path, step = None, start = None, end = None):
+    def __init__(self, path, step = None, start = None, end = None, loop = False):
         self.path = path
         self.fileList = self.populateList(start, end, step)
+        self.totalFrames = len(self.fileList)
+
         self.currentFrame = 0
         self.loop = False
 
         fp = os.path.join(self.path, self.fileList[0])
+
         self.resolution = Image.open(fp).size
         
         self.normalfont = cv.InitFont(cv.CV_FONT_HERSHEY_SIMPLEX, 1, 1, 0, 1, 8)
@@ -71,9 +266,24 @@ class VirtualCam(object):
         '''
         Return the time of most recent content modification of the file fname
         '''
-        return os.stat(fname)[-2]
+        fileTime = os.stat(fname)[-2]
+        return time.asctime(time.localtime(fileTime))
 
-    def getImage(self, timestamp=False):
+    def __addTimestamp__(self, im, text, PIL):
+        '''
+        Add a text to the image
+        '''
+        width, height = self.resolution
+        x = 10
+        y = height - 15
+        textcolor = 0xffffff
+
+        draw = Draw(im)
+        draw.text((x, y), text, font=self.font, fill=textcolor)
+        return im
+     
+
+    def getImage(self, timestamp=False, PIL=True):
         '''
         Returns a PIL Image instance.
 
@@ -86,22 +296,23 @@ class VirtualCam(object):
         self.currentFrame += 1
 
         try:
-            im = Image.open(fp)
+            #im = Image.open(fp)
+            im = cv.LoadImage(fp)
+            
         except:
             print 'error with image %s' % fp
             raise
 
+        if self.scale:
+            newsize = cv.CreateMat(self.out_resolution[0], self.out_resolution[1], cv.CV_8UC3)
+            cv.Resize(im, newsize)
+
+        if PIL:
+            im = Image.fromstring("RGB", cv.GetSize(im), im.tostring()) # Convert to PIL see was http://www.depthfirstsearch.net/blog/2008/09/22/opencv-and-python/
+
         if timestamp:
-            width, height = self.resolution
-            x = 0.97 * width
-            y = 0.97 * height
-            textcolor = 0xffffff
-
-            fileTime = self.__getFileTime__(fp)
-            text = time.asctime(time.localtime(fileTime))
-
-            draw = Draw(im)
-            draw.text((x, y), text, font=self.font, fill=textcolor)
+            text = self.__getFileTime__(fp)
+            im = self.__addTimestamp__(im, text, PIL)
         
         return im
     
@@ -121,18 +332,7 @@ class VirtualCam(object):
         fileList.sort()
         return fileList[start:end:step]
 
-    def isLastFrame(self):
-        '''
-        Are we processing the last frame in the folder?
-        '''
-        l = len(self.fileList)
-        if (self.currentFrame == l) and not self.loop:
-            return True
-        elif (self.currentFrame == l) and self.loop:
-            self.currentFrame = 0
-            return False
-        else:
-            return False
+
             
     
     def getResolution(self):
@@ -162,30 +362,56 @@ class VirtualCam(object):
             
         return toimage(avg_array / len(avg_array))
 
+    def getTotalFrames(self):
+        '''
+        Return the total number of frames
+        '''
+        return self.totalFrames
+        
+    def isLastFrame(self):
+        '''
+        Are we processing the last frame in the folder?
+        '''
 
-
+        if (self.currentFrame == self.totalFrames) and not self.loop:
+            return True
+        elif (self.currentFrame == self.totalFrames) and self.loop:
+            self.currentFrame = 0
+            return False
+        else:
+            return False        
+            
+            
 class Monitor(object):
     """
         The main monitor class
     """
 
-    def __init__(self, devnum=0, resolution=(800,600), virtual_cam = None ):
+    def __init__(self, devnum=0, resolution=(800,600), camera = None ):
         '''
         A Monitor contains a cam, which can be either virtual or real.
         Real CAMs are handled through opencv.
+        
+        devnum
         '''
 
-        if virtual_cam:
-            self.cam = VirtualCam(path=virtual_cam[0], step=virtual_cam[1], start = virtual_cam[2], end = virtual_cam[3])
+        if camera: #virtual
+            
+            #self.cam = virtualCamFrame(path=camera['path'], step=camera['step'], start = camera['start'], end = camera['end'], loop = camera['loop'])
+
+            self.cam = virtualCamMovie(path=camera['path'], step=camera['step'], start = camera['start'], end = camera['end'], loop = camera['loop'])
+
             resolution = self.cam.getResolution()
-            self.numberOfFrames = len(self.cam.fileList)
-        else:
-            self.cam = RealCam(devnum=devnum)
+            self.numberOfFrames = self.cam.getTotalFrames()
+            
+            
+        else: #real
+            self.cam = realCam(devnum=devnum)
             self.cam.setResolution(*resolution)
             self.numberOfFrames = 0
         
 
-        self.isVirtualCam = virtual_cam
+        self.isVirtualCam = ( camera != None)
         self.resolution = resolution
 
         self.use_average = False
@@ -406,7 +632,6 @@ class Monitor(object):
 
         return img
 
-
     def GetDiffImg(self, draw_crop = False, **keywords):
         '''
         GetDiffImg(self, draw_crop = False, timestamp=0, boldfont=0, textpos='bl')
@@ -461,7 +686,6 @@ class Monitor(object):
             for img in self.cam.fileList:
                 f_in = os.path.join(in_path, img)
                 im = Image.open(f_in)
-                #print im.size
                 if im.size != resolution: 
                     im = im.resize(resolution, Image.ANTIALIAS)
                 
