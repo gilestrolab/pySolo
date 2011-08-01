@@ -1,0 +1,16 @@
+README
+======
+
+pySolo is a multiplatform software for analysis of sleep and locomotor activity in Drosophila melanogaster. pySolo provides a user-friendly graphic interface and it has been developed with the specific aim of being accessible, portable, fast and easily expandable through an intuitive plug-in structure. Support for development of additional plug-ins is provided through a community website. 
+
+Software and documentation are located at http://www.pysolo.net. pySolo is a free software released under the GNU General Public License.
+
+Requires:
+    * python 2.x
+    * wxpython
+    * matplotlib
+    * numpy
+    * scipy
+    
+    
+See http://www.pysolo.net for more information
