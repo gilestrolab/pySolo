@@ -2,7 +2,7 @@
 import os
 
 #This part is to decide whether we are running a .deb package or not
-debian=False
+debian=True
 if debian:
     cPath = '/opt/pysolo/'
     optPath = os.environ['HOME']    
