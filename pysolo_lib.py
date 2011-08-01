@@ -41,10 +41,10 @@ from pysolo_options import userConfig, customUserConfig
 GUI = dict()
 
 class partial: #AKA curry
-    '''
+    """
     This functions allows calling another function upon event trigger and pass arguments to it
     ex buttonA.Bind (wx.EVT_BUTTON, partial(self.Print, 'Hello World!'))
-    '''
+    """
 
     def __init__(self, fun, *args, **kwargs):
         self.fun = fun
@@ -62,9 +62,9 @@ class partial: #AKA curry
 
 
 def logText(text):
-    '''
+    """
     Log message in the logfile
-    '''
+    """
     now = datetime.datetime.today()
     text = '%04d/%02d/%02d\t%02d:%02d\t%s\n' % (now.year, now.month, now.day, now.hour, now.minute, text)
     try:
@@ -76,10 +76,10 @@ def logText(text):
 
 
 class partial: #AKA curry
-    '''
+    """
     This functions allows calling another function upon event trigger and pass arguments to it
     ex buttonA.Bind (wx.EVT_BUTTON, partial(self.Print, 'Hello World!'))
-    '''
+    """
 
     def __init__(self, fun, *args, **kwargs):
         self.fun = fun
@@ -96,20 +96,20 @@ class partial: #AKA curry
         return self.fun(*(self.pending + args), **kw)
 
 def SetFileAsModified(target):
-    '''
+    """
     Starts an EVENT telling around that the file has been
     modified from its original form
-    '''
+    """
     #create the event
     evt = myEVT_FILE_MODIFIED(wx.NewId(), Modified=True)
     #post the event
     wx.PostEvent(target, evt)
 
 def list2str(l, separator=' + '):
-    '''
+    """
     Takes the items in a list and expand them in a string
     where items are separated by 'separator'
-    '''
+    """
     out = ''
     a = len(separator)
     for i in l:
@@ -117,22 +117,16 @@ def list2str(l, separator=' + '):
     return out[:-a]
 
 def CheckUpdatedVersion():
-    '''
+    """
     Check for an updated version of the program online
-    the line on the website must have format:
-    <!-- latest_pysolo_version=##v.v## -->
-    '''
-    new_ver = {}
-    webaddress = 'http://www.pysolo.net/?q=download'
-    tag_line = 'latest_pysolo_version'
-    
-    versions = urlopen(webaddress).read()
-    
-    versions = versions.split('\n')
-    for line in versions:
-        if tag_line in line:
-            version = line.split('##')[1]
-    
+    """
+    webaddress = 'http://www.pysolo.net/last_version.txt'
+    try:
+        version = urlopen(webaddress).read().rstrip('\n')
+        if len(version) > 10: version = '0.0.0'
+    except:
+        version = '0.0.0'
+        
     if version > pySoloVersion:
         return version
     else:
@@ -140,9 +134,9 @@ def CheckUpdatedVersion():
 
 
 def SaveDADFile(cDAM, filename):
-    '''
+    """
     Saves away the content of the DAM memory in a DAD file
-    '''
+    """
 
     try:
         filename = str(filename)
@@ -172,14 +166,10 @@ def SaveDADFile(cDAM, filename):
 
     return success
 
-
-
-    
-
 def LoadDADFile(filename):
-    '''
+    """
     Open the zipped file and copies its contents in the DAM variable (DAM is a list of DAMslice)
-    '''
+    """
     cDAM = []
     filename = str(filename)
 ##    try:
