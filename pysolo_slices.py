@@ -3,7 +3,7 @@
 import datetime
 import numpy as np
 
-pySoloVersion ='0.6.5'
+pySoloVersion ='0.6.5-master-git'
 
 
 class DAMslice(object):
