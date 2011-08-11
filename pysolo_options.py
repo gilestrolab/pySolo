@@ -259,18 +259,19 @@ class OptionsFilesFolderPanel(wx.ScrolledWindow):
 
             items.append (  wx.StaticText(self, -1, '\nSelect RAW Data structure.') )
             items[-1].SetFont(titleFont)
-            items.append (  wx.StaticText(self, -1, 'Select the version of the input type file.\nYou can select between Trikinetics \'channel files\' or \'monitor files\'\nor specify a custom format for the raw files.\n') )
+            items.append (  wx.StaticText(self, -1, 'Select the version of the input type file.\n') )
 
             grid1 = wx.FlexGridSizer( 0, 1, 0, 0 )
             self.DAM_version_radio = []
-            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'Channel Files', name = 'Channel', style = wx.RB_GROUP ) )
-            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'Monitor Files', name = 'Monitor' ) )
-            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'Custom Format (see Docs)', name = 'Custom' ) )
+            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'Trikinetics - Channel Files', name = 'Channel', style = wx.RB_GROUP ) )
+            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'Trikinetics - Monitor Files', name = 'Monitor' ) )
+            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'pySolo Video - Distance', name = 'pvg_distance' ) )
+            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'pySolo Video - Virtual Beam Split', name = 'pvg_beam' ) )
 
             for radio in self.DAM_version_radio:
                 grid1.Add( radio, 0, wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP, 5 )
                 radio.Bind(wx.EVT_RADIOBUTTON, partial(self.OnGroupSelect, 'DAMtype', bool=False ))
-            ck = ['Channel', 'Monitor', 'Custom'].index(self.temp_userconfig['DAMtype'])
+            ck = ['Channel', 'Monitor', 'pvg_distance', 'pvg_beam'].index(self.temp_userconfig['DAMtype'])
             self.DAM_version_radio[ck].SetValue(True)
 
             items.append (grid1)

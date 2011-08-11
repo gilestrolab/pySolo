@@ -14,9 +14,9 @@ class DAMlist(CustTableGrid):
         self.Bind(wx.EVT_KEY_DOWN, self._OnKeyDown)
 
     def _OnKeyDown(self, event):
-        '''
+        """
         used for autocompletion
-        '''
+        """
         if event.GetKeyCode() == 9: #if we press the TAB KEY
             row = self.GetGridCursorRow()
             col = self.GetGridCursorCol()
@@ -25,9 +25,9 @@ class DAMlist(CustTableGrid):
         event.Skip()
 
     def autoComplete(self, row, col):
-        '''
+        """
         auto complete
-        '''
+        """
         output = ''
         
         ct = ['','','mon1','ch1','mon2','ch2','','','mm1','dd1','mm2', 'dd2', 'yyyy','','']
@@ -53,15 +53,15 @@ class DAMlist(CustTableGrid):
         return str(output)
 
     def rowNumber(self):
-        '''
+        """
         Return the number of rows that compose the table
-        '''
+        """
         return len(self.table.data)
 
     def AddTagToChecked(self, tag_name):
-        '''
+        """
         Add the specified tag to the cheked rows
-        '''
+        """
         for row in range( self.rowNumber() ):
             if self.table.data[row][1] and not self.table.data[row][14]: #if cheched and visible
                 all_tags = set(self.table.data[row][13].split(';'))
@@ -70,9 +70,9 @@ class DAMlist(CustTableGrid):
                 self.table.data[row][13] = list2str(all_tags, separator=';')
 
     def RemoveTagFromChecked(self, tag_name):
-        '''
+        """
         Remove the specified tag from all checked rows
-        '''
+        """
         for row in range( self.rowNumber() ):
             if self.table.data[row][1] and not self.table.data[row][14]: #if cheched and visible
                 all_tags = self.table.data[row][13].split(';')
@@ -80,9 +80,9 @@ class DAMlist(CustTableGrid):
                 self.table.data[row][13] = list2str(all_tags, ';')
 
     def ShowAll(self):
-        '''
+        """
         Show (unhide) all the rows
-        '''
+        """
         for row in range( self.rowNumber() ):
             if len(self.table.data[row]) == 15:
                 self.table.data[row][14] = 0
@@ -92,9 +92,9 @@ class DAMlist(CustTableGrid):
 
     
     def ShowTagged(self, tag_name):
-        '''
+        """
         Show only the rows that have a specified tag_name
-        '''
+        """
         found_some = False
         self.ShowAll()
         
@@ -108,34 +108,34 @@ class DAMlist(CustTableGrid):
         return found_some
 
     def GetCheckedRows(self):
-        '''
+        """
         return a list containing the numbers corresponding to the checked rows
-        '''
+        """
         checked = []
         for row in self.table.data:
             if row[1]: checked.append(row[0]) # if the line is checked
         return checked
 
     def AllChecked(self):
-        '''
+        """
         are all the rows checked?
-        '''
+        """
         AllChecked = True
         for row in self.table.data:
             if not row[14]: AllChecked = AllChecked * row[1]
         return AllChecked
 
     def CheckAll(self, value):
-        '''
+        """
         Check / Uncheck all rows
-        '''
+        """
         for row in range( self.rowNumber() ):
             if not self.table.data[row][14]: self.table.data[row][1] = value
         
     def search(self, searchMask):
-        '''
+        """
         search in the table and show only the results that satisfy the query
-        '''
+        """
 
         for item in searchMask[-1]:
 
@@ -153,9 +153,9 @@ class DAMlist(CustTableGrid):
 
 
     def ControRowsSyntax(self):
-        '''
+        """
         Goes through damlist and checks that all necessary values are filled in the checked rows
-        '''
+        """
         allFilled = True
 
         if ( len(self.table.data) == 0 ) or (list(zip(*self.table.data)[1]).count(True) == 0 ): allFilled = False #no row available or no row selected
@@ -170,9 +170,9 @@ class DAMlist(CustTableGrid):
 
 
     def DeleteRows(self, tobeDel):
-        '''
+        """
         Delete the rows specified in the tobeDel list
-        '''
+        """
         dl = self.table.data; self.SetData([])
 
         tobeDel.sort(); tobeDel.reverse()
@@ -183,37 +183,37 @@ class DAMlist(CustTableGrid):
         self.SetData(dl)
 
     def AddRow(self, tag_name):
-        '''
+        """
         Add a new empty row. Will have the specified tag_name
-        '''
+        """
         #Create the new row and add it to the table
         new_id = '%s' % ( len(self.table.data)+1 )
         new_row = [new_id, False] + [''] * 11 + [tag_name] + [False]
         self.table.AddRow([new_row])
 
     def ChangeRow(self, row, content):
-        '''
+        """
         Change the content of specified row
-        '''
+        """
         self.table.data[row] = content
 
     def Empty(self):
-        '''
+        """
         Clear empty the all table
-        '''
+        """
         #self.table.data = []
         self.SetData([])
 
     def hasValues(self):
-        '''
+        """
         is the table empty or has some values?
-        '''
+        """
         return (len(self.table.data) > 0)
 
     def UpdateChecked(self, content):
-        '''
+        """
         replace the content of all checked and visible rows
-        '''
+        """
         somethingChanged = False
         
         for row in range( self.rowNumber() ):
@@ -226,25 +226,25 @@ class DAMlist(CustTableGrid):
         return somethingChanged
 
     def Update(self):
-        '''
+        """
         refresh and update the value of the table
-        '''
+        """
         self.SetData (self.table.data)
         self.doHide()
 
     def renumber(self):
-        '''
+        """
         Renumber all the list properly
-        '''
+        """
         for row in range(self.rowNumber()):
             self.table.data[row][0] = row+1
 
 
 
     def doHide(self):
-        '''
+        """
         Hide those rows where visible bool value is set to false
-        '''
+        """
         for row in range( self.rowNumber() ):
             if self.table.data[row][14]==1: self.SetRowSize(row,0)
         self.ForceRefresh()
@@ -253,9 +253,9 @@ class DAMlist(CustTableGrid):
 
 
 class pySolo_DBFrame(wx.Frame):
-    '''
+    """
     This is the main frame class for the DB
-    '''
+    """
     def __init__(self, parent, id, title, siblingMode = False):
 
         wx.Frame.__init__(self, parent, id, title, (-1,-1), size=(1024,768), style = wx.DEFAULT_FRAME_STYLE )
@@ -282,9 +282,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def MakeTheNoteBook(self):
-        '''
+        """
         Makes the Notebook
-        '''
+        """
         self.nb = wx.Notebook(self)
         self.nb.AddPage(self.PageListing(self.nb), 'Listing')
         self.nb.AddPage(self.PageBrowser(self.nb), 'Browser')
@@ -292,9 +292,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def GetOptionValues(self):
-        '''
+        """
         TODO!
-        '''
+        """
         self.title = 'PySolo v%s - Database' % pySoloVersion
         self.filename = ''
         self.INPUT_BOX = []
@@ -308,10 +308,10 @@ class pySolo_DBFrame(wx.Frame):
         self.dirname = userConfig['DAMoutput'][:]
 
     def TagPanel(self, parent):
-        '''
+        """
         This function creates the Tag Panel to be add to the notebook.
         Returns a Panel instance
-        '''
+        """
         tagpanel = wx.Panel(parent)
         self.TagList = []
         self.TagListBox = wx.ListBox(tagpanel, wx.ID_ANY, (0,0), (-1,-1), self.TagList)
@@ -341,10 +341,10 @@ class pySolo_DBFrame(wx.Frame):
         return tagpanel
 
     def PageListing(self, nb):
-        '''
+        """
         This function creates the Listing Panel to be add to the notebook.
         Returns a Panel instance
-        '''
+        """
         minpane, initpos = 130,130
         sp = wx.SplitterWindow(nb)
         sp.SplitVertically(self.TagPanel(sp), self.TableListing(sp), initpos)
@@ -352,9 +352,9 @@ class pySolo_DBFrame(wx.Frame):
         return sp
 
     def resetTablesSize(self):
-        '''
+        """
         Set size for columns
-        '''
+        """
         cols_size = (30,22,38,38,38,38,100,100,38,38,38,38,42,0,0)
 
         self.DAMlist.SetColsSize(cols_size)
@@ -366,10 +366,10 @@ class pySolo_DBFrame(wx.Frame):
         self.searchSheet.SetRowLabelSize(3)
 
     def TableListing(self, parent):
-        '''
+        """
         This function creates the Listing Panel to be add to the notebook.
         Returns a Panel instance
-        '''
+        """
         tblpnl = wx.Panel(parent, wx.ID_ANY)
 
         colLabels = ['ID','','SM','SCh','EM','ECh','Genotype','Comment','MM','DD','MM','DD','YYYY','Tags','']
@@ -444,10 +444,10 @@ class pySolo_DBFrame(wx.Frame):
         return tblpnl
 
     def PageBrowser(self, nb):
-        '''
+        """
         Creates the Browsing panel to be add to the notebook
         Returns a Panel instance
-        '''
+        """
 
         gap = (1,1)
         labels = ('Mon', 'Start', 'End', ' ', 'Mon', 'Start', 'End', ' ', 'Mon', 'Start', 'End', '')
@@ -526,9 +526,9 @@ class pySolo_DBFrame(wx.Frame):
         return panel
 
     def MakeMenuBar(self):
-        '''
+        """
         Makes the Menu Bar
-        '''
+        """
         #Gives new IDs to the menu voices in the menubar
         ID_FILE_NEW = wx.NewId()
         ID_FILE_OPEN = wx.NewId()
@@ -631,9 +631,9 @@ class pySolo_DBFrame(wx.Frame):
         wx.EVT_MENU(self, ID_HELP_ABOUT, self.OnAbout)
 
     def GetTagName(self):
-        '''
+        """
         Get currently selected tag name stripped from the brackets indicating the number of tagged items
-        '''
+        """
         sel_tag = self.TagListBox.GetSelection()
         
         if sel_tag != -1:
@@ -648,18 +648,18 @@ class pySolo_DBFrame(wx.Frame):
         return tag_name
 
     def OnSelectTag(self,event):
-        '''
+        """
         Will show only the row marked with the selected tag
-        '''
+        """
 
         tag_name = self.GetTagName()
         self.DAMlist.ShowTagged(tag_name)
         self.updateListing()
 
     def OnNewTag(self, event):
-        '''
+        """
         Add a new tag
-        '''
+        """
         
         tag_name = str(self.newTagBox.GetValue())
         tag_name = tag_name.replace(';', '\.,')
@@ -683,9 +683,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnRemoveTag(self, event):
-        '''
+        """
         Remove the currently selected tag from the checked items
-        '''
+        """
 
         sel_tag = self.TagListBox.GetSelection()
         
@@ -703,9 +703,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnAddRow(self, event):
-        '''
+        """
         Add a new row to the table
-        '''
+        """
 
         #Get the Tagname that the new row will inherit
         tag_name = self.GetTagName()
@@ -723,9 +723,9 @@ class pySolo_DBFrame(wx.Frame):
         self.DAMlist.GoToEnd()
 
     def OnRemRow(self, event):
-        '''
+        """
         Remove one or more rows from the table
-        '''
+        """
         del_msg = 'You need to check the lines you wish to remove first'
 
         tobeDel = self.DAMlist.GetCheckedRows()
@@ -744,9 +744,9 @@ class pySolo_DBFrame(wx.Frame):
             self.updateTagList()
 
     def OnTodayDate(self,event):
-        '''
+        """
         Clicking on the TodayDate the date mask is filled with the today's date
-        '''
+        """
         today = datetime.date.today()
         self.searchSheet.data[-1][8] = int(today.month)
         self.searchSheet.data[-1][9] = int(today.day)
@@ -755,10 +755,10 @@ class pySolo_DBFrame(wx.Frame):
         self.searchSheet.data[-1][12] = int(today.year)
 
     def OnApplyMods(self, event):
-        '''
+        """
         Clicking on the Apply button will fill all selected rows with the
         data in the search mask
-        '''
+        """
         searchString = self.searchSheet.GetData()[-1]
         
         somethingChanged = self.DAMlist.UpdateChecked(searchString)
@@ -766,9 +766,9 @@ class pySolo_DBFrame(wx.Frame):
         if somethingChanged:self.updateListing()
 
     def OnFileNew(self,event):
-        '''
+        """
         Creates a new DAL file
-        '''
+        """
         #ADD support for self.fileIsModfied
         self.filename = ''
         self.DAMlist.Empty()
@@ -777,9 +777,9 @@ class pySolo_DBFrame(wx.Frame):
         self.SetTitle( 'PySolo ' + pySoloVersion + ' - Database' )
 
     def OnFileOpen(self, filename=None, event=None):
-        '''
+        """
         Open a previously saved DAL file
-        '''
+        """
         joiningDAMlist = False
 
         if self.DAMlist.hasValues():
@@ -811,9 +811,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnFileClose(self, event):
-        '''
+        """
         Closing current file
-        '''
+        """
         self.DAMlist.Empty()
         #self.ReadFile()
         self.SetTitle(self.title)
@@ -822,9 +822,9 @@ class pySolo_DBFrame(wx.Frame):
         self.updateTagList()
 
     def OnFileSave(self, event):
-        '''
+        """
         Save away the DAMlist as DAL file
-        '''
+        """
         
         if self.filename != '':
             # Open the file for write, write, close
@@ -837,9 +837,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnFileSaveAs(self, event):
-        '''
+        """
         Save away the DAMlist as DAL file
-        '''
+        """
 
         wildcard = 'DAM list files (*.dal)|*.dal|All files (*.*)|*.*'
         dlg = wx.FileDialog(self, 'Choose a file', self.dirname, '', wildcard, wx.SAVE | wx.OVERWRITE_PROMPT)
@@ -856,9 +856,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnFileExit(self, event):
-        '''
+        """
         On Exit program
-        '''
+        """
         #add support for self.fileIsModfied
         dlg = wx.MessageDialog(self, 'Are you sure you want to exit from the program?', 'Closing', wx.YES_NO | wx.ICON_QUESTION)
         if dlg.ShowModal() == wx.ID_YES:
@@ -868,9 +868,9 @@ class pySolo_DBFrame(wx.Frame):
             dlg.Destroy()
 
     def OnClose(self, event):
-        '''
+        """
         Hides or Closes the frame according to which modality the program is running
-        '''
+        """
 
         if not self.SiblingMode:
             self.Destroy()
@@ -881,16 +881,16 @@ class pySolo_DBFrame(wx.Frame):
             self.BrotherFrame.Destroy()
 
     def OnSelectDataType(self, data_type = None, event = None):
-        '''
+        """
         We select which data type to use
-        '''
+        """
         #global GUI
         GUI['datatype'] = data_type
 
     def OnAnalysisLoad(self, checkOnlyFiles = False, evt = None):
-        '''
+        """
         Called when we want to load the raw data, creates the dad file and save it
-        '''
+        """
 
         self.DAM = []
         monrange = ''
@@ -912,18 +912,16 @@ class pySolo_DBFrame(wx.Frame):
                     self.DAM.append (DAMslice(row[2], row[3], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12]))
                                     #DAMslice(mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version=pySoloVersion)
                                     
-            datatype = userConfig['DAMtype']
+            datatype = userConfig['DAMtype'] #Channel, Monitor, pvg_distance, pvg_beam
 
-            if datatype == 'Monitor':
+            if datatype == 'Monitor' or datatype == 'pvg_beam' or 'pvg_distance':
                 self.LoadRawDataMonitor(inputPath, checkOnlyFiles)
             elif datatype == 'Channel' and GUI['datatype'] == 'TANK':
                 self.LoadRawDataTank(inputPath, checkOnlyFiles)
             elif datatype == 'Channel' and GUI['datatype'] == 'Regular':
                 self.LoadRawDataChannel(inputPath, checkOnlyFiles)
             elif datatype == 'Channel' and GUI['datatype'] == 'Video':
-                pass
-            elif datatype == 'Custom':
-                pass
+                print ("NOT SUPPORTED")
 
 
         else:
@@ -933,9 +931,9 @@ class pySolo_DBFrame(wx.Frame):
             dlg.Destroy()
 
     def OnSendtoAnalysis(self, event):
-        '''
+        """
         Called when we want to pass the currently analyse data to Anal
-        '''
+        """
         if not(self.DAM):
             self.BrotherFrame.Show(True)
             dlg = wx.MessageDialog(self,
@@ -950,17 +948,17 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnShowAnalysis(self, event):
-        '''
+        """
         Called when we want to pass the currently analyse data to Anal
-        '''
+        """
 
         if self.BrotherFrame.IsActive:
             self.BrotherFrame.Show(True)
 
     def OnShowOptions(self, event):
-        '''
+        """
         From Menu: Creates and shows the Option Panel
-        '''
+        """
         try:
             self.OptionPanel.Show(True)
         except:
@@ -970,9 +968,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnImportFromCSV(self,event):
-        '''
+        """
         Import a list from a CSV file
-        '''
+        """
         csv = ''
         self.DAMlist.Empty()
 
@@ -1004,9 +1002,9 @@ class pySolo_DBFrame(wx.Frame):
         self.PopulateBrowser()
 
     def OnCheckAll(self, event):
-        '''
+        """
         checks / unchecks all rows of currently visible items
-        '''
+        """
 
         AllChecked = self.DAMlist.AllChecked()
 
@@ -1036,9 +1034,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnSearch(self,event):
-        '''
+        """
         Performs a search in the current DAMlist
-        '''
+        """
 
         self.OnSelectTag(None)
 
@@ -1050,22 +1048,22 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def OnExportToCSV(self, event):
-        '''
+        """
         Export current list to a CSV file
-        '''
+        """
         self.DAMlist.OnExportToFile(None)
 
     def OnChangeDAMentrySelection(self,event):
-        '''
+        """
         Called whenever we select a new item in the listbox of the Browser page
-        '''
+        """
         self.SaveDAMentry()
         self.PopulateBrowser(1)
 
     def OnAbout(self, event):
-        '''
+        """
         Shows the about dialog
-        '''
+        """
         about = 'pySolo - v %s\n' % pySoloVersion
         about += 'by Giorgio F. Gilestro\n'
         about += 'Visit http://www.pysolo.net for more information'
@@ -1075,10 +1073,10 @@ class pySolo_DBFrame(wx.Frame):
         dlg.Destroy()
 
     def OnPageChanged(self,event):
-        '''
+        """
         when the notebook page is changed the data are temporally saved in memory
         and the selected pane is refreshed
-        '''
+        """
         if self.nb.GetPageText(self.nb.GetSelection()) == 'Listing':
             self.SaveDAMentry()
             self.lastSelected = -1
@@ -1088,10 +1086,10 @@ class pySolo_DBFrame(wx.Frame):
             self.PopulateBrowser()
 
     def AutoFill(self, row, col, event):
-        '''
+        """
         Automatically fills the Monitor/Channel values in a smart way
         FIX THIS
-        '''
+        """
         col = self.AutoFillchk.GetValue()*col
         inc = int(self.AutoFillInc.GetValue())
         try:
@@ -1119,9 +1117,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def updateListing(self):
-        '''
+        """
         Refreshes the contents of the table
-        '''
+        """
 
         self.DAMlist.Update()
         self.searchSheet.ForceRefresh()
@@ -1130,10 +1128,10 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def ClearBrowserPage(self):
-        '''
+        """
         clears off certain values from the browsing panel
         ## TODO: This should be changed to make the code more readable.
-        '''
+        """
         
         if not self.DAMlist.hasValues(): self.BrowsingData[4].Set([])
         
@@ -1143,10 +1141,10 @@ class pySolo_DBFrame(wx.Frame):
             txt.SetValue('')
 
     def PopulateBrowser(self,t=0):
-        '''
+        """
         Updates the contents of the Browser panel
         ## TODO: This should be changed to make the code more readable.
-        '''
+        """
         self.ClearBrowserPage()
         self.lastSelected = self.BrowsingData[-1].GetSelection()
         i = 1
@@ -1200,10 +1198,10 @@ class pySolo_DBFrame(wx.Frame):
                 self.lastSelected = -1
 
     def SaveDAMentry(self):
-        '''
+        """
         Called from Browser panel: saves the current browsing entry
         # TODO: This should be changed to make the code more readable.
-        '''
+        """
         dl = self.DAMlist.GetData()
         if self.DAMlist.hasValues():
             row = (self.lastSelected)
@@ -1239,9 +1237,9 @@ class pySolo_DBFrame(wx.Frame):
                 self.DAMlist.ChangeRow(row, dt)
 
     def ReadFile(self):
-        '''
+        """
         Reads a DAL file and imports the data in the listing page
-        '''
+        """
         dl = self.DAMlist.GetData()
         try:
             FILE = open(self.filename, 'r')
@@ -1258,9 +1256,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def AddRecentFile(self):
-        '''
+        """
         Add the just opened file to the list of the most recent file names
-        '''
+        """
         max_no_entries_list = 5
         global userConfig
         rfl = userConfig['RecentFiles']
@@ -1282,10 +1280,10 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def updateTagList(self, selection=0):
-        '''
+        """
         Reads all tags present in the current DAMlist
         Returns a list alphabetically ordered
-        '''
+        """
 
         if self.DAMlist.hasValues():
 
@@ -1313,9 +1311,9 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def ProgressBarDlg(self, count, msg='', max = 100):
-        '''
+        """
         Shows a progress bar dialog and updates it
-        '''
+        """
         keepGoing = True
 
         if count == 0:
@@ -1329,10 +1327,10 @@ class pySolo_DBFrame(wx.Frame):
             (keepGoing, skip) = self.dlgPD.Update(count, msg)
 
     def LoadRawDataMonitor(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
-        '''
+        """
         Takes the data from the folder where the raw data are placed
         Uses the one file one channel syntax
-        '''
+        """
 
         year = month = day = monitor = channel = ''
         PDcount = 0
@@ -1431,10 +1429,10 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def LoadRawDataTank(self, checkFilesOnly = False): #USER DEFINED
-        '''
+        """
         Takes the data from the folder where the raw data are placed
         Uses the one file one channel syntax
-        '''
+        """
 
         year = month = day = monitor = channel = ''
         PDcount = 0
@@ -1512,10 +1510,10 @@ class pySolo_DBFrame(wx.Frame):
 
 
     def LoadRawDataChannel(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
-        '''
+        """
         Takes the data from the folder where the raw data are placed
         Uses the one file one channel syntax
-        '''
+        """
 
         year = month = day = monitor = channel = ''
         PDcount = 0
@@ -1588,10 +1586,10 @@ class pySolo_DBFrame(wx.Frame):
         self.ProgressBarDlg(-2,'End.')
 
     def SaveDADData(self):
-        '''
+        """
         Save away the analysed data as DAD file.
         A first big file with tmp extension is created than zipped into a smaller archive and then deleted
-        '''
+        """
         wildcard = 'DAM DATA files (*.dad)|*.dad|All files (*.*)|*.*'
         dlg = wx.FileDialog(self, 'Choose a file', self.dirname, '', wildcard, wx.SAVE | wx.OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:

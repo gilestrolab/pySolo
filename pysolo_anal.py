@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import wx, os
+import wx, os, glob
 from pysolo_path import panelPath, imgPath
 os.sys.path.append(panelPath)
 
@@ -13,17 +13,17 @@ import wx.lib.scrolledpanel as scrolled
 from wx.lib.buttons import GenBitmapToggleButton
 import wx.lib.customtreectrl as CT
 
-from pylab import *
+#from pylab import *
 
 class ExportVariableSideBar(wx.Panel):
-    '''
+    """
     Custom Panel for the Export Variable sidebar
-    '''
+    """
     
     def __init__(self, parent):
-        '''
+        """
         create the actual panel
-        '''
+        """
         
         self.outputPath = userConfig['DAMoutput']
         self.defaultvarList = ['Selected Activity', 'Selected Sleep 5min', 'Selected Sleep 30min']
@@ -82,9 +82,9 @@ class ExportVariableSideBar(wx.Panel):
         self.SetSizer(sz_a)
 
     def pickVariable(self, event):
-        '''
+        """
         Called when we pick a variable from the list
-        '''
+        """
         for n in self.varListBox.GetSelections():
             picked = self.varList[n]
             if picked not in self.defaultvarList:
@@ -100,9 +100,9 @@ class ExportVariableSideBar(wx.Panel):
             self.filenameBox.SetValue(self.filename)
 
     def getFilename(self, var_name, extension):
-        '''
+        """
         Returns a filename that is proper for the currently selected variable
-        '''
+        """
         
         n = 1
         fname = str(var_name).lower().replace(' ','_') + '_%02d' % n
@@ -115,9 +115,9 @@ class ExportVariableSideBar(wx.Panel):
         return fname
 
     def updateVariableList(self, currentPage):
-        '''
+        """
         update the list of variables in the listbox
-        '''
+        """
         varList = []
         for var in GUI['canExport']:
             if GUI['canExport'][var].panel == currentPage: varList.append(var)
@@ -125,9 +125,9 @@ class ExportVariableSideBar(wx.Panel):
         self.varListBox.Set(self.varList)
     
     def getOutputParams(self):
-        '''
+        """
         return the file extension based on the format chosen
-        '''
+        """
         if self.out_format[0].GetValue():
             format = 'binary'
             extension = '.bin'
@@ -138,9 +138,9 @@ class ExportVariableSideBar(wx.Panel):
         return format, extension
 
     def onExport(self, event):
-        '''
+        """
         Export Variables to file
-        '''
+        """
         format, extension = self.getOutputParams()
         fname = self.getFilename(self.varname, extension) + extension
         full_path = os.path.join(self.outputPath, fname)
@@ -154,7 +154,7 @@ class ExportVariableSideBar(wx.Panel):
             wx.MessageBox('Error saving the file %s\nDisk may be full or you may not have write rights.' % full_path, 'Error!', style=wx.OK|wx.ICon_EXCLAMATIon)
 
     def ExportDefaultVariable(self, fpath, var_name, export_format):
-        '''
+        """
         Export
         activity of selected flies or
         sleep5min of selected flies or
@@ -164,7 +164,7 @@ class ExportVariableSideBar(wx.Panel):
         var_name = 'Selected Activity' || 'Selected Sleep 5min' || 'Selected Sleep 30min']
         export_format = 'binary', 'text'
 
-        '''
+        """
         allSelections = GUI['dtList']
         cDAM = GUI['cDAM']
         t0,t1 = None, None #do we want to customize these?
@@ -208,9 +208,9 @@ class ExportVariableSideBar(wx.Panel):
             return False #something went wrong
         
     def onBrowse(self, event):
-        '''
+        """
         Browse to select the output folder
-        '''
+        """
         dlg = wx.DirDialog(self, "Choose a directory:",
                           style=wx.DD_DEFAULT_STYLE
                            #| wx.DD_DIR_MUST_EXIST
@@ -224,14 +224,14 @@ class ExportVariableSideBar(wx.Panel):
 
 
 class OptionSideBar(wx.Panel):
-    '''
+    """
     Custom Panel for the options sidebar
-    '''
+    """
     
     def __init__(self, parent):
-        '''
+        """
         create the actual panel
-        '''
+        """
         
         wx.Panel.__init__(self, parent, -1)
         
@@ -254,9 +254,9 @@ class OptionSideBar(wx.Panel):
         self.SetSizer(OptSideBarSizer)
 
     def onSelChanged(self, event):
-        '''
+        """
         Called whenever the selection in the dropbox changes
-        '''
+        """
         if self.OptionsTree.GetSelections():
             self.lastSel = self.OptionsTree.GetSelections()[0]
         
@@ -293,10 +293,10 @@ class OptionSideBar(wx.Panel):
 
 
     def SetItemsList(self, checked, choices):
-        '''
+        """
         Set the list of selectable items in the dropbox so that the ones
         selected will appear marked with an asterisk.
-        '''
+        """
         
         if len(choices) != 1:
             new_choices = ['Select'] + [str(i) for i in choices]
@@ -315,9 +315,9 @@ class OptionSideBar(wx.Panel):
 
 
     def onChangeInput(self, event):
-        '''
+        """
         When we change the value of the var in the combobox
-        '''
+        """
         vv = ''
         
         if self.SelVarType == 'text':
@@ -348,18 +348,18 @@ class OptionSideBar(wx.Panel):
             self.OptionsTree.SetItemText(SelItem, lbl)
 
     def PopulateOptionsTree(self):
-        '''
+        """
         Populate the options tree in the right hand side
         Every panel is a parental node
-        '''
-        '''
+        """
+        """
         option_panel = the name of the panel
         option_name = the name of the variable for the option_panel
         option_type = boolean | radio | text | multiple
         option_checked = the int number indicating the position of the chosen value in option_choices. Must be 0 if option_type = text
         option_choices = a list containing the possible choices
         option_description = the description of the option
-        '''
+        """
 
         self.OptionsTree.DeleteAllItems()
         itemData = (-1,)
@@ -374,10 +374,10 @@ class OptionSideBar(wx.Panel):
                 self.OptionsTree.AppendItem(LVL1[-1], '%s: %s' % (option_name, option_value))
 
 class NavigationTree(CT.CustomTreeCtrl):
-    '''
+    """
     Custom Class defining the navigation tree
     The CustomTreeCtrl is way faster than the regular treectrl
-    '''
+    """
 
     def __init__(self, parent):
 
@@ -401,9 +401,9 @@ class NavigationTree(CT.CustomTreeCtrl):
 
 
     def onKeyDown(self,event):
-        '''
+        """
         Detects a key down event and take corresponding action
-        '''
+        """
         keycode =  event.GetKeyCode()
         if keycode < 256:
              self.KeyDown = chr(keycode)
@@ -417,17 +417,17 @@ class NavigationTree(CT.CustomTreeCtrl):
         event.Skip()
 
     def onKeyUp(self, event):
-        '''
+        """
         Restore the pressed key record
-        '''
+        """
         self.KeyDown = ''
         event.Skip()
 
     def onSelChanged(self, event):
-        '''
+        """
         Before passing the click checks if there is an action to be performed
         due to a key pressed by the user
-        '''
+        """
 
         if self.KeyDown == 'H': pass
 
@@ -436,9 +436,9 @@ class NavigationTree(CT.CustomTreeCtrl):
 
 
     def onContextMenu(self, event):
-        '''
+        """
         Creates and handles a popup menu
-        '''
+        """
         if not hasattr(self, 'popupID1'):
             self.popupID1 = wx.NewId()
             self.popupID2 = wx.NewId()
@@ -480,9 +480,9 @@ class NavigationTree(CT.CustomTreeCtrl):
         menu.Destroy()
 
     def DoChangeStatus(self, status, event=None):
-        '''
+        """
         Changes the Status of the object associated to the selected tree item(s)
-        '''
+        """
         allSelections = []
         color = ('gray', 'black')
         day_type = ('BS', 'SD', 'RC', '  ')
@@ -518,11 +518,11 @@ class NavigationTree(CT.CustomTreeCtrl):
 
 
     def onExpandCollapseTree(self, event=None, n=None):
-            '''
+            """
             Expand or Collapse all first nodes of the tree
             n = 0 -> expand
             n = 1 -> collapse
-            '''
+            """
             
             if n == None: n = not GUI['TreeCollapsed'] * 1
             action = [self.Expand, self.Collapse][n]
@@ -534,11 +534,11 @@ class NavigationTree(CT.CustomTreeCtrl):
             GUI['TreeCollapsed'] = [False, True][n]
 
     def PopulateNavigationTree(self):
-        '''
+        """
         Goes through the DAM variable and populates the tree
         Every item in the tree is going to be associated to a data bearing the coordinates to identify that item
         and make the proper analysis on the notebook panel
-        '''
+        """
 
         # type    G, M, D, F
         #dt  0    1, 2, 3, 4
@@ -629,9 +629,9 @@ class NavigationTree(CT.CustomTreeCtrl):
 #---------------------- MAIN FRAME STARTS HERE -----------------------------#
 
 class pySolo_AnalysisFrame(wx.Frame):
-    '''
+    """
     This is the main frame, containing everything
-    '''
+    """
     def __init__(self, parent, id, title, siblingMode = False):
         global GUI, userConfig
 
@@ -701,9 +701,9 @@ class pySolo_AnalysisFrame(wx.Frame):
         self.SiblingMode = True
 
     def AnalyseArgs(self):
-        '''
+        """
         Check the args coming from the command line and interprete them as due
-        '''
+        """
         args = sys.argv
         if args.count('-c'):
             p = args.index('-c') + 1
@@ -718,23 +718,23 @@ class pySolo_AnalysisFrame(wx.Frame):
 
 
     def MakeTheNotebook(self):
-        '''
+        """
         Here we create a notebook and its pages
-        '''
+        """
 
         self.nb = wx.Notebook(self.sp)
         self.GetPanels()
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.Refresh, self.nb)
 
     def GetPanels(self):
-        '''
+        """
         This function will load all the panels found in the panel directory
-        '''
+        """
         
         self.Pages = []
         
-        PanelList = os.listdir(panelPath) # this is a list of all the files in the panels folder
-        num_of_Panels = (';'.join(PanelList)+';').count('.py;') - 1 #count how many we have and subtract 1 to remove default_panels.py
+        PanelList = glob.glob(os.path.join(panelPath, '*.py') )
+        num_of_Panels = len(PanelList) - 1 #count how many we have and subtract 1 to remove default_panels.py
 
         if ('Panels' in userConfig) and userConfig['Panels'] and ( num_of_Panels == len(userConfig['Panels']) ):
 
@@ -752,7 +752,7 @@ class pySolo_AnalysisFrame(wx.Frame):
                 if cPanel != '':
                     NewPanel = __import__(cPanel)
                     self.Pages.append (NewPanel.Panel(self.nb))
-                    if self.Pages[-1].compatible == pySoloVersion:
+                    if self.Pages[-1].compatible > pySoloVersion:
                         self.nb.AddPage(self.Pages[-1], self.Pages[-1].name)
  
         else:
@@ -774,19 +774,19 @@ class pySolo_AnalysisFrame(wx.Frame):
                         userConfig['Panels'][module_name] = [position, True]
 
     def MakeTheSideBar(self):
-        '''
+        """
         We create the panel that will sit on the right side to modify panel specific parameters
-        '''
+        """
 
         sbPanel = MultiSplitterWindow(self.sp)
         sbPanel.SetOrientation(wx.VERTICAL)
-        sbPanel.SetMinimumPaneSize(270)
+        sbPanel.SetMinimumPaneSize(300)
         #sbPanel.SetSashSize(30)
         self.OptSB = OptionSideBar(sbPanel)
         self.OptSB.PopulateOptionsTree()
         self.ExportSB = ExportVariableSideBar(sbPanel)
         
-        sbPanel.AppendWindow(self.OptSB,270)
+        sbPanel.AppendWindow(self.OptSB,300)
         sbPanel.AppendWindow(self.ExportSB)
 
         return sbPanel
@@ -794,9 +794,9 @@ class pySolo_AnalysisFrame(wx.Frame):
         
 
     def MakeTheTree(self):
-        '''
+        """
         Creates the tree
-        '''
+        """
         self.TreePanel = wx.Panel(self.sp, -1)
 
         TreeSizer = wx.BoxSizer(wx.VERTICAL)
@@ -827,9 +827,9 @@ class pySolo_AnalysisFrame(wx.Frame):
 
 
     def MakeMenuBar(self):
-        '''
+        """
         Creates the menubar
-        '''
+        """
 
         #Gives new IDs to the menu voices in the menubar
         ID_FILE_OPEN = wx.NewId()
@@ -924,9 +924,9 @@ class pySolo_AnalysisFrame(wx.Frame):
 #----------------------------------------- EVENTS -----------------------------------------------------------#
 
     def openSingleVideoFile(self, filename):
-        '''
-        Used to import a coords file from the pySolo video plugin
-        '''
+        """
+        Used to import a coords file from the legacy version of pySolo video plugin
+        """
         global cDAM
 
         aborted = False
@@ -965,18 +965,18 @@ class pySolo_AnalysisFrame(wx.Frame):
         wx.EndBusyCursor()
         
     def onJoinTreeItems(self, event):
-        '''
+        """
         Allow multiple selection of items without updating the panel status.
-        '''
+        """
         GUI['JoinTreeItems'] = not(GUI['JoinTreeItems'])
         if GUI['JoinTreeItems'] == False:
             self.Refresh(event)
 
     def onFileOpen(self, filename=None, event=None):
-        '''
+        """
         This event is called when the user selects the Open voice in the File Menu. It will prompt for the open file dialog and
         pass the filename to the LOADDADZIPData function
-        '''
+        """
         global cDAM
 
         aborted = False
@@ -1028,9 +1028,9 @@ class pySolo_AnalysisFrame(wx.Frame):
 
 
     def onFileSave(self, event=None):
-        '''
+        """
         Save the current file
-        '''
+        """
 
         if GUI['filename']:
 
@@ -1052,9 +1052,9 @@ class pySolo_AnalysisFrame(wx.Frame):
             self.onFileSaveAs(None)
         
     def onFileSaveAs(self, event):
-        '''
+        """
         Save the file with another name
-        '''
+        """
         wildcard = 'DAD files (*.dad)|*.dad|All files (*.*)|*.*'
         dlg = wx.FileDialog(self, 'Choose a file', userConfig['DAMoutput'], '', wildcard, wx.SAVE | wx.OVERWRITE_PROMPT)
         if dlg.ShowModal() == wx.ID_OK:
@@ -1064,9 +1064,9 @@ class pySolo_AnalysisFrame(wx.Frame):
         dlg.Destroy()
 
     def onFileClose(self,event):
-        '''
+        """
         Closes the current File
-        '''
+        """
         if self.fileisModified:
             msg = 'The file has been modified.\n Are you sure you want to close it without saving?'
         else:
@@ -1086,9 +1086,9 @@ class pySolo_AnalysisFrame(wx.Frame):
             dlg.Destroy()
 
     def onFileExit(self, event):
-        '''
+        """
         This event is called when the user selects the Exit voice in the file dialog. Prompt for confirmation before quitting
-        '''
+        """
         if self.fileisModified:
             dlg = wx.MessageDialog(self, 'File has been modified.\nDo you want to Exit anyhow?', 'Closing', wx.YES_NO | wx.ICON_QUESTION)
             if dlg.ShowModal() == wx.ID_YES:
@@ -1100,9 +1100,9 @@ class pySolo_AnalysisFrame(wx.Frame):
             self.Close(True)
 
     def onClose(self, event):
-        '''
+        """
         Hides or Closes the frame according to which modality the program is running
-        '''
+        """
         if not self.SiblingMode:
             self.Destroy()
         elif self.SiblingMode and self.BrotherFrame.IsShown():
@@ -1112,9 +1112,9 @@ class pySolo_AnalysisFrame(wx.Frame):
             self.BrotherFrame.Destroy()
 
     def onResize(self, event):
-        '''
+        """
         When we resize the frame
-        '''
+        """
         XSize = self.Size[0]
         isOSBVisible = self.OptSB.IsShown()
         SashPos = isOSBVisible * (XSize - 400) or (XSize - 200 )
@@ -1123,17 +1123,17 @@ class pySolo_AnalysisFrame(wx.Frame):
 
 
     def onShowDatabase(self, event):
-        '''
+        """
         Called when we want to Show the Database
-        '''
+        """
 
         if self.BrotherFrame.IsActive:
             self.BrotherFrame.Show(True)
 
     def onCheckVersion(self, event=None, automatic=True):
-        '''
+        """
         Check online for a newer version
-        '''
+        """
         wx.BeginBusyCursor()
         new_version = CheckUpdatedVersion()
         wx.EndBusyCursor()
@@ -1148,9 +1148,9 @@ class pySolo_AnalysisFrame(wx.Frame):
             if dlg.ShowModal() == wx.ID_OK: dlg.Destroy()
 
     def onShowOptions(self, event):
-        '''
+        """
         From Menu: Creates and shows the Option Panel
-        '''
+        """
         try:
             self.OptionPanel.Show(True)
         except:
@@ -1159,9 +1159,9 @@ class pySolo_AnalysisFrame(wx.Frame):
             self.OptionPanel.Show(True)
             
     def onShowOptionsSideBar(self, event):
-        '''
+        """
         Show/Hide the Options Side bar on the right end side
-        '''
+        """
         XSize = self.Size[0]
         isVisible = not self.OptSB.IsShown()
         self.OptSB.Show(isVisible)
@@ -1170,42 +1170,42 @@ class pySolo_AnalysisFrame(wx.Frame):
 
 
     def onGraphErrBar(self, event):
-        '''
+        """
         From Menu: When Errorbars are set true/false
-        '''
+        """
         global GUI
         GUI['ErrorBar'] = event.IsChecked()
         self.Refresh()
 
     def onActivityFilter(self, event):
-        '''
+        """
         From Menu: When the Activity Filter is set true/false
-        '''
+        """
         global GUI
         GUI['ActivityFilter'] = event.IsChecked()
         self.Refresh()
         
         
     def onChooseColor(self, color_name, event):
-        '''
+        """
         The user decides the color to be used for drawing
-        '''
+        """
         GUI['UseColor'] = color_name
 
     def getOpenPanel(self):
-        '''
+        """
         Get the name of the currently open notebook page
-        '''
-        CurPage = self.nb.GetPageText(self.nb.GetSelection())
+        """
+        CurPage = self.nb.GetPageText( self.nb.GetSelection() )
 
         for Panel in self.Pages:
             if CurPage == Panel.name: return Panel
 
 
     def Refresh(self, event=None):
-        '''
+        """
         Checks what is the currently selected notebook page and draws data only there
-        '''
+        """
 
         #if we are not building a joint group then proceeds
         if not GUI['JoinTreeItems']:
@@ -1253,12 +1253,12 @@ class pySolo_AnalysisFrame(wx.Frame):
 
 
     def ProgressBarDlg(self, count, msg='', max = 100):
-        '''
+        """
         Creates and updates a progress bar dialog
         count: 0 will create the dialog, -1 will destroy it, x will update value to x
         msg = shows this message on the progressbardlg
         max = maximum value possible
-        '''
+        """
         keepGoing = True
 
         if count == 0:
@@ -1272,17 +1272,17 @@ class pySolo_AnalysisFrame(wx.Frame):
 
 
     def PassData(self, DAMData):
-        '''
+        """
         Receives the DAMdata passed from the DB brother frame. No need to load the data from disk again
-        '''
+        """
         global cDAM
         cDAM = DAMData
         self.Tree.PopulateNavigationTree()
 
     def SetfileisModified(self, event):
-        '''
+        """
         Set the flag to indicate that we have modified the file from its original version.
-        '''
+        """
         if not self.fileisModified:
             self.fileisModified = event.Modified
             self.title += '(*)'

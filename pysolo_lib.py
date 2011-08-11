@@ -40,27 +40,6 @@ from pysolo_sleep_fun import *
 from pysolo_options import userConfig, customUserConfig
 GUI = dict()
 
-class partial: #AKA curry
-    """
-    This functions allows calling another function upon event trigger and pass arguments to it
-    ex buttonA.Bind (wx.EVT_BUTTON, partial(self.Print, 'Hello World!'))
-    """
-
-    def __init__(self, fun, *args, **kwargs):
-        self.fun = fun
-        self.pending = args[:]
-        self.kwargs = kwargs.copy()
-
-    def __call__(self, *args, **kwargs):
-        if kwargs and self.kwargs:
-            kw = self.kwargs.copy()
-            kw.update(kwargs)
-        else:
-            kw = kwargs or self.kwargs
-
-        return self.fun(*(self.pending + args), **kw)
-
-
 def logText(text):
     """
     Log message in the logfile

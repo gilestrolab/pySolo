@@ -3,11 +3,11 @@
 import datetime
 import numpy as np
 
-pySoloVersion = '0.7.0-master-git'
+pySoloVersion = '0.8-master-git'
 
 
 class DAMslice(object):
-    '''
+    """
     DAMslice is the core class for managing the DAM data. The object DAMslice contains
     all the properties that refer to one genotype.
     
@@ -25,7 +25,7 @@ class DAMslice(object):
     4        2        1            60
     5        3        1            60
     
-    '''
+    """
     def __init__(self, mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version=pySoloVersion):
 
         #Data coming from outside
@@ -68,11 +68,11 @@ class DAMslice(object):
 
 
     def __CalculateSleep__(self, fly_to_calc=None, inactivity=0):
-        '''
+        """
         This function will calculate sleep5mins and sleep30mins array
         for all the flies of the current DAM
         inactivity could be higher than 0 if there is a noise in the activty level (for instance with video analysis).
-        '''
+        """
 
 
         if fly_to_calc:
@@ -115,9 +115,9 @@ class DAMslice(object):
 
 
     def ___resampleAllto1440__(self):
-        '''
+        """
         This function can be used to resample all our arrays to 1440 bins per day (1 bin per minute)
-        '''
+        """
         
         d,f,c = self.fly.shape
         c1 = c / 1440
@@ -132,35 +132,35 @@ class DAMslice(object):
         
 
     def getHeader(self):
-        '''
+        """
         Return the initial information about the DAMslice as a list
         the first argument in the list is the class name
         the second argument in the list must be a list with the following parameters
         [mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version]
-        '''
+        """
         return [DAMslice, self.Header]
 
     def getTotalDays(self):
-        '''
+        """
         Return the number of days recorded in this DAMslice
-        '''
+        """
         elapse = datetime.date(self.EndYear, self.EndMonth, self.EndDay) - datetime.date(self.StartYear, self.StartMonth, self.StartDay)
         return elapse.days +1
 
     def getTotalFlies(self):
-        '''
+        """
         Return the total number of flies recorded in this DAMslice
-        '''
+        """
         tot = 0
         for i in range (0,len(self.StartChannel)):
             tot += int(self.EndChannel[i]) - int(self.StartChannel[i]) +1
         return tot
 
     def getMonitorFlyName(self, f, d=None):
-        '''
+        """
         given fly 
         returns monitor_name and channel 
-        '''
+        """
         r = self.getChannelsMonitorsRange()
         monitor = r[1][f]
         channel = r[0][f]
@@ -168,17 +168,17 @@ class DAMslice(object):
         
 
     def getGenotype(self):
-        '''
+        """
         Return the genotype name
-        '''
+        """
         return str(self.Genotype)
 
     def getDatesRange(self):
-        '''
+        """
         Return a 3-dimensional list composed of three list of the same size:
         the list of days, the list of months, the list of year
         eg: [[30,31,1,2],[12,12,1,1],[2007,2007,2008,2008]]
-        '''
+        """
 
         dateStart = datetime.date( self.StartYear, self.StartMonth, self.StartDay )
         dateEnd = datetime.date( self.EndYear, self.EndMonth, self.EndDay )
@@ -193,11 +193,11 @@ class DAMslice(object):
         return [rangedays, rangemonths, rangeyear]
 
     def getChannelsMonitorsRange(self):
-        '''
+        """
         Return an array composed of two arrays of the same size:
         the list of channel numbers and the list of monitor_names
         Example: [[1,2,3,4,5,6,7],[5,5,5,5,5,5,5]]
-        '''
+        """
         rangeCh, rangeMon = [], []
         for i in range (0,len(self.Mon)):
             rangeCh += range(int(self.StartChannel[i]), int(self.EndChannel[i])+1)
@@ -206,26 +206,26 @@ class DAMslice(object):
         return rangeCh, rangeMon
 
     def getFliesInMon(self, mon):
-        '''
+        """
         Return the first and the last fly belonging to the monitor_name mon
-        '''
+        """
         mon = str(int(mon))
         f = self.rangeChannel[1].index(mon)
         f1 = f + self.rangeChannel[1].count(mon)-1
         return f, f1
 
     def getRangePerMon(self, monitor):
-        '''
+        """
         Return the list of channels (1-32) within a given monitor
-        '''
+        """
         monitor = int(monitor)
         return range (int(self.StartChannel[monitor]), int(self.EndChannel[monitor])+1)
 
     def getDate(self, d, f=None, format = 'mm/dd'):
-        '''
+        """
         Return a string with formatted Date for for the Nth day in current DAMslice
         format can use: m, mm, d, dd, yy, yyyy and / as separator
-        '''
+        """
         d = int(d)
 
         if d >= 0 and d < self.totDays:
@@ -250,10 +250,10 @@ class DAMslice(object):
 
 
     def getMonitorName(self, m, d=None, f=None):
-        '''
+        """
         given the monitor number, returns a string with the monitor_name 
         If all monitor are selected will return the string 'all'
-        '''
+        """
 
         if self.isOneMon and m == -1: m = 0
         if m >= 0:
@@ -264,11 +264,11 @@ class DAMslice(object):
         return mon_name
 
     def getChannelName(self, m, f, d=None):
-        '''
+        """
         Return a string with the channel specified monitor.
         If all channels are selected will return the string 'all'
         TODO: Adjust this!
-        '''
+        """
         if m == -1 and self.isOneMon: m = 0
 
         #if m >= 0 and f >= 0:
@@ -281,10 +281,10 @@ class DAMslice(object):
         return output
 
     def getFliesInInterval(self, m, f, d=None):
-        '''
+        """
         Return the tuple f, f1 as fly values
         If all flies are selected f=0, f1=self.totFlies-1
-        '''
+        """
 
         if f == -1 and m == -1:
             f, f1 = 0, self.totFlies
@@ -303,10 +303,10 @@ class DAMslice(object):
         return f, f1
 
     def getDaysInInterval(self, d, m=None, f=None):
-        '''
+        """
         Return the tuple d, d1 as int values
         If all days are selected d=0, d1=self.totDays-1
-        '''
+        """
 
         if d == -1:
             d, d1 = 0, self.totDays
@@ -317,11 +317,11 @@ class DAMslice(object):
 
 
     def setFly(self, d, f, activity):
-        '''
+        """
         Set the raw data for fly f at day d
         Then calculates the 5min sleep bins and the 30min sleep curve
         activity is a list of bins spanning the day (default length = 1440)
-        '''
+        """
 
         self.fly[d,f] = activity
         #calculate sleep for the fly, if it is dead
@@ -330,7 +330,7 @@ class DAMslice(object):
         if d == (self.totDays - 1)  and f == (self.totFlies - 1): self.__CalculateSleep__()
 
     def setFlyStatus(self, d, d1, f, f1, status=0):
-        '''
+        """
         Change the status of the flies f to f1 for days d to d1:
 
         -1 - Inactive Baseline
@@ -346,7 +346,7 @@ class DAMslice(object):
         5 - Make Active
 
         Only active flies are counted when flyAlive is run
-        '''
+        """
 
         if f1 ==-1:
             f1 = self.totFlies
@@ -373,7 +373,7 @@ class DAMslice(object):
 
 
     def allinStatus(self, mon=None, day=None, fly=None, status=-5):
-        '''
+        """
         Return true if all the flies in the interrogated category have the same status
 
         -5 - All Inactive
@@ -384,7 +384,7 @@ class DAMslice(object):
         +/-3 - Recovery
         +/-4 - None
 
-        '''
+        """
 
         def AllinStatus(input):
             if status == -5: return all ([v < 0 for v in input])
@@ -422,7 +422,7 @@ class DAMslice(object):
 
 
     def filterbyStatus(self, d, d1, f, f1, t0=None, t1=None, status=5, use_dropout = True, min_alive = 0, max_alive = 1400, useFilter = True):
-        '''
+        """
         RETURN MASKED ARRAY
         This function filters the fly raw data by fly status and returns the distribution
         of the fundamental values in the selected population. 
@@ -441,7 +441,7 @@ class DAMslice(object):
             4 - Active None
             5 - All Active
 
-        '''
+        """
 
 
         if useFilter: ## Do we exclude inactive flies from our harvesting?
@@ -497,16 +497,16 @@ class DAMslice(object):
         return fly_slice, fly5_slice, fly30_slice
 
     def saveRawData(self, tmpFileHandle):
-        '''
-        '''
+        """
+        """
         self.fly.tofile(tmpFileHandle)
         self.fly5min.tofile(tmpFileHandle)
         self.fly30min.tofile(tmpFileHandle)
         self.flyStatus.tofile(tmpFileHandle)
 
     def loadRawData(self, tmpFileHandle):
-        '''
-        '''
+        """
+        """
         shape = self.fly.shape
         size = self.fly.size
         shapeStatus = self.flyStatus.shape
@@ -519,22 +519,22 @@ class DAMslice(object):
         self.flyStatus = np.fromfile(tmpFileHandle, count = sizeStatus, dtype=datatype).reshape(shapeStatus)
 
 class videoSlice(DAMslice):
-    '''
+    """
     This is the class modified to handle pysolo Video files.
     Input files are of kind .ccf (coordinates files)
-    '''
+    """
 
     def __init__(self, mon='0', sch='1', ech='1', genotype='none', comment='', smont='1', sd='1', emont='1', eday='1', year='1900', version=pySoloVersion):
-        '''
+        """
         Proxy to DAMslice
-        '''
+        """
         DAMslice.__init__(self, mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version)
         
 
     def __updateHeaderData__(self, genotype):
-        '''
+        """
         This is run by loadSingleFile after a single file has been loaded
-        '''
+        """
         
         d,f,c = self.fly.shape
         mon = 0; sch = 1; ech = f
@@ -569,10 +569,10 @@ class videoSlice(DAMslice):
         
 
     def loadSingleFile(self, filename, use_virtual_trikinetics=False, min_act=100, max_act=1000 ):
-        '''
+        """
         open a file containing the raw coordinates and populates the DAMslice with the data
         inside then computes the activity of the flies
-        '''
+        """
         #open the filename and stores the coords
         self.coords = self.getCoordinatesArray(filename)
         
@@ -599,12 +599,12 @@ class videoSlice(DAMslice):
         self.___resampleAllto1440__()
 
     def expandToProperSize(self, in_array, size=None):
-        '''
+        """
         If the recording has missed some frames then we need to fill in here and there with some other values
         will do this on the activity array
         Can calculate the proper size or can be suggested what size expand to
         this is not a Fourier based resampling, it's just interpolation
-        '''
+        """
         
         d,f,c = in_array.shape
         
@@ -637,10 +637,10 @@ class videoSlice(DAMslice):
 
 
     def getCoordinatesArray(self, filename):
-        '''
+        """
         open a file with one day worth of data and returns a 3D numpy array with the data inside
         Array coordinates are (num_flies, num_frames, 2)
-        '''
+        """
         
         n_day = 1
         f = open (filename, 'r')
@@ -669,10 +669,10 @@ class videoSlice(DAMslice):
     
     
     def getActivityFromCoords(self, coords):
-        '''
+        """
         coords is a 3D array of shape: num_flies, num_frames, (x, y)
         returns an array of size num_flies, num_frames
-        '''
+        """
         coords1 = np.roll(coords, 1, axis=2) #copy and roll everything 1 position on the right frame
         
         #subtract one to the other to have the measure of the perpendicular distances
@@ -685,12 +685,12 @@ class videoSlice(DAMslice):
         return dist
 
     def getActivityFromPosition(self, coords, beam_size=35):
-        '''
+        """
         coords is a 3D array of shape: num_flies, num_frames, (x, y)
         returns an array of size num_flies, num_frames
         
         the data returned here are computed as if in a Virtual Monitor
-        '''
+        """
         y_pos = coords[:,:,:,1]
         #here we draw the virtual line which is going to be exactly half way #
         #between the highest point and the lowest point
@@ -709,16 +709,16 @@ class videoSlice(DAMslice):
 class sixminsSlice(DAMslice):
     
     def __init__(self, mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version=pySoloVersion):
-        '''
-        '''
+        """
+        """
         DAMslice.__init__(self, mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version=pySoloVersion)
     
     
     def __CalculateSleep__(self, fly_to_calc=None):
-        '''
+        """
         This function will calculate sleep5mins and sleep30mins array
         for all the flies of the current DAM
-        '''
+        """
 
         if fly_to_calc:
             fc = range(fly_to_calc, fly_to_calc+1)
@@ -757,12 +757,12 @@ class sixminsSlice(DAMslice):
 
 
 class plusSlice(DAMslice):
-    '''
+    """
     the class tankSlice add some functionalities to DAMslice by providing further data for use
     with the trikinetics systems. It includes two new arrays: one called response where we store
     data about the response time (TANK system) and one called lights were we can store data about
     the lights conditions.
-    '''
+    """
     def __init__(self, mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version=pySoloVersion):
         DAMslice.__init__(self, mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version)
 
@@ -770,31 +770,31 @@ class plusSlice(DAMslice):
         self.lights = np.zeros((self.totDays, self.datalenght), dtype=self.datatype)
 
     def getHeader(self):
-        '''
+        """
         Return the initial information about the DAMslice as a list
         the first argument in the list is the class name
         the second argument in the list must be a list with the following parameters
         [mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version]
-        '''
+        """
         return [DAMslice, self.Header]
 
     def setResponse(self, d, f, response):
-        '''
+        """
         When we use the tank we need to store also another bit of information
         namely after how many milliseconds did the fly cross the beam
-        '''
+        """
         self.response[d,f] = response
 
     def setLights(self, d, lights):
-        '''
+        """
         Set the light status for the given day
-        '''
+        """
         self.lights[d] = lights
 
     def getResponseTime(self, mask_f, d, d1, f, f1):
-        '''
+        """
         Only for TANKED data. Return response time profile of the flies f to f1 for days d to d1 masking away according to the provided mask_f
-        '''
+        """
 
         if f1 ==-1:
             f1 = None
@@ -810,8 +810,8 @@ class plusSlice(DAMslice):
         return rt_transposed
 
     def saveRawData(self, tmpFileHandle):
-        '''
-        '''
+        """
+        """
         self.fly.tofile(tmpFileHandle)
         self.fly5min.tofile(tmpFileHandle)
         self.fly30min.tofile(tmpFileHandle)
@@ -820,8 +820,8 @@ class plusSlice(DAMslice):
         self.lights.tofile(tmpFileHandle)
 
     def loadRawData(self, tmpFileHandle):
-        '''
-        '''
+        """
+        """
         shape = self.fly.shape
         size = self.fly.size
         shapeStatus = self.flyStatus.shape
@@ -841,15 +841,15 @@ class plusSlice(DAMslice):
 
 
 class metaSlice(DAMslice):
-    '''
+    """
     the class metaSlice is a class that provide the possibility of
     having flies with different histories in the same slice
     it inherits all properties and functions of DAMslice and introduce new ones
     based on two new classes called metaFly and metaDay
-    '''
+    """
     def __init__(self, mon=None, sch=None, ech=None, genotype=None, comment=None, smont=None, sd=None, emont=None, eday=None, year=None, version=None, metaFlies=None):
-        '''
-        '''
+        """
+        """
         if metaFlies:
             #self.Header = header
             self.metaFly = metaFlies
@@ -858,16 +858,16 @@ class metaSlice(DAMslice):
             self.metaFly = []
 
     def AddFly(self, f):
-        '''
+        """
         Add a new metaFly to the list metaFly
-        '''
+        """
         self.metaFly.append (f)
 
     def getTotalDays(self):
-        '''
+        """
         Return the maximum number of days
         it equals the number of days the longest living fly lived
-        '''
+        """
         d = []
         for f in self.metaFly:
             d.append ( f.getTotalDays() )
@@ -875,15 +875,15 @@ class metaSlice(DAMslice):
         return int(d[-1])
 
     def getTotalFlies(self):
-        '''
+        """
         return the total number of flies in this metaSlice
-        '''
+        """
         return len(self.metaFly)
 
     def ToDAMslice(self):
-        '''
+        """
         inherits from DAMslice all the properties
-        '''
+        """
         #DAMslice(mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version=PySoloVersion)
         mon = 0
         sch = 1
@@ -899,9 +899,9 @@ class metaSlice(DAMslice):
         DAMslice.__init__(self, mon, sch, ech, self.genotype, comment, s_date.month, s_date.day, e_date.month, e_date.day, s_date.year)
 
     def getMonitorName(self, m, d=None, f=None):
-        '''
+        """
         return the REAL monitor name or 0 for a virtual one
-        '''
+        """
 
         if f != None and f >= 0 and d < self.metaFly[f].getTotalDays():
             output = self.metaFly[f].metaDay[d].monitor
@@ -924,10 +924,10 @@ class metaSlice(DAMslice):
         return output
 
     def getMonitorFlyName(self, f, d=None):
-        '''
+        """
         given the fly number in the matrix,
         returns the name of the monitor and the channel she was in
-        '''
+        """
         if d == -1: d = None
 
         monitor = self.metaFly[f].getMonitor(d)
@@ -936,11 +936,11 @@ class metaSlice(DAMslice):
         return monitor, channel
 
     def getDate(self, d, f=None, format = 'mm/dd'):
-        '''
+        """
         Return a string with formatted Date for for the Nth day for the specified fly
         or else a crescent dayber if the fly is not specified
         format can use: m, mm, d, dd, yy, yyyy and / as separator
-        '''
+        """
 
         output = 'Day %s' % (d+1)
 
@@ -985,37 +985,37 @@ class metaSlice(DAMslice):
         return output
 
     def getHeader(self):
-        '''
+        """
         Return the initial information about the metaDAMslice as list
         the first item in the list is the DAMclass
         the second item are the default headers as list
         + any eventual needed item
-        '''
+        """
         return [metaSlice, self.Header + [self.metaFly]]
 
 
 
 
 class metaFly(object):
-    '''
+    """
     The metafly class contains the details of a "metafly"
-    '''
+    """
 
     def __init__(self, genotype):
         self.genotype = genotype
         self.metaDay = []
 
     def AddStartDay(self, mon, ch, date, comment=''):
-        '''
+        """
         the first day of recording
-        '''
+        """
         start_day = metaDay(monitor=mon, channel=ch, date=date, comment=comment)
         self.metaDay.append(start_day)
 
     def AddTipDay(self, mon, ch, date, comment='', end=False):
-        '''
+        """
         day in which we tip the fly to a new monitor/channel
-        '''
+        """
         new_date = date
         last_metaDay = self.metaDay[-1]
         last_mon = last_metaDay.monitor
@@ -1037,25 +1037,25 @@ class metaFly(object):
             self.metaDay.append(finalDay)
 
     def AddEndDay(self, date, comment=''):
-        '''
+        """
         The day we discard the fly
-        '''
+        """
         ch = 0
         mon = 0
         self.AddTipDay(mon, ch, date, comment, end=True)
 
     def getTotalDays(self):
-        '''
+        """
         How many days did we record
-        '''
+        """
         elapse = self.metaDay[-1].date - self.metaDay[0].date
         return elapse.days + 1
     
     def getMonitor(self, d=None):
-        '''
+        """
         return the monitor name for day d
         if d is not specified will return a set with the monitor names
-        '''
+        """
         if d != None and d!= -1:
             monitor = self.metaDay[d].monitor
         else:
@@ -1064,10 +1064,10 @@ class metaFly(object):
         return monitor
         
     def getChannel(self, d=None):
-        '''
+        """
         return the channel name for day d
         if d is not specified will return a set with the channel names
-        '''
+        """
         if d != None and d!= -1:
             channel = self.metaDay[d].channel
         else:
@@ -1079,10 +1079,10 @@ class metaFly(object):
             
 
 class metaDay(object):
-    '''
+    """
     the metaday class is used to create a meta DAMslice in which flies have different origins
     (for instance different monitors on different days)
-    '''
+    """
     def __init__(self, monitor, channel, date, comment=''):
         self.monitor = int(monitor)
         self.channel = int(channel)
