@@ -25,7 +25,7 @@ class Panel(GridGrid):
         
         GridGrid.__init__(self, parent, PanelProportion, [AVGLabels, sfLabels], [AVGdataTypes, sfdataTypes])
         self.name = 'All Data'
-        self.compatible = '0.6.5'
+        self.compatible = '0.9'
 
     def Refresh(self):
         '''

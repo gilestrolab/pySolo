@@ -26,7 +26,7 @@ class Panel(PlotGrid):
                         
                         
         self.name = 'Single Fly Data'
-        self.compatible = '0.6.5'
+        self.compatible = '0.9'
         
     def Refresh(self):
         '''

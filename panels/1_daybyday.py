@@ -26,7 +26,7 @@ class Panel(PlotGrid):
                                          #choiceList
                                          )
         self.name = 'Day By Day'
-        self.compatible = '0.6.5'
+        self.compatible = '0.9'
 
         self.AddOption('Yactivity', 'radio', 3, ['Max (dynamic)', '15', '10', '5'], 'Set the upper limit for the Y axis on the Activity plot')
 

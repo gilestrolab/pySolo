@@ -29,7 +29,7 @@ class Panel(PlotGrid): #Class name must be Panel
                                          #choiceList
                                          )
         self.name = 'Browser'
-        self.compatible = '0.6.5'
+        self.compatible = '0.9'
 
 
         self.AddOption('use_grid', 'boolean', 1, ['Draw grid', 'Do not draw grid'], 'Do you want to draw a cartesian grid in the graph?')
@@ -190,7 +190,7 @@ class Panel(PlotGrid): #Class name must be Panel
         # x and y indicate distance from the bottom left corner (from 0 to 1)
         # w, h are the width and height of the graph (0 to 1, 1 means as big as the whole canvas)
         #
-        a4 = fig.add_axes([0.08, 0.08, 0.88, 0.03], yticks=[])
+        a4 = fig.add_axes([0.08, 0.08, 0.98, 0.03], yticks=[])
 
         #Draw the light/dark bar at the very bottom
         light_pattern = [[0]*(DayLength/2)+[1]*(DayLength/2),]
@@ -212,16 +212,16 @@ class Panel(PlotGrid): #Class name must be Panel
         ipno[indices] = 1
         ipno = ipno,
 
-        if sync: a3 = fig.add_axes([0.08, 0.12, 0.88, 0.1], yticks=[], sharex=a4)
-        else: a3 = fig.add_axes([0.08, 0.12, 0.88, 0.1], yticks=[])
+        if sync: a3 = fig.add_axes([0.08, 0.12, 0.98, 0.1], yticks=[], sharex=a4)
+        else: a3 = fig.add_axes([0.08, 0.12, 0.98, 0.1], yticks=[])
         
         a3.imshow(ipno, aspect='auto', cmap=mpl.cm.binary, interpolation='nearest')
 
         mpl.artist.setp( a3.get_xticklabels(), visible=False)
 
         #Draw the Activity plot
-        if sync: a1 = fig.add_axes([0.08, 0.60, 0.88, 0.3], sharex=a4)
-        else:  a1 = fig.add_axes([0.08, 0.60, 0.88, 0.3])
+        if sync: a1 = fig.add_axes([0.08, 0.60, 0.98, 0.3], sharex=a4)
+        else:  a1 = fig.add_axes([0.08, 0.60, 0.98, 0.3])
 
         if activity_bin > 1:
             pos = range(0,DayLength,activity_bin)
@@ -245,8 +245,8 @@ class Panel(PlotGrid): #Class name must be Panel
 
 
         #Draw the daily sleep graph
-        if sync: a2 = fig.add_axes([0.08, 0.25, 0.88, 0.3], sharex=a4)
-        else: a2 = fig.add_axes([0.08, 0.25, 0.88, 0.3])
+        if sync: a2 = fig.add_axes([0.08, 0.25, 0.98, 0.3], sharex=a4)
+        else: a2 = fig.add_axes([0.08, 0.25, 0.98, 0.3])
         
         a2.plot(sleep, color=col)
 

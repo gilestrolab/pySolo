@@ -29,7 +29,7 @@ class Panel(PlotGrid):
                                          choiceList
                                          )
         self.name = 'Sleep Trend'
-        self.compatible = '0.6.5'
+        self.compatible = '0.9'
         
 
     def Refresh(self):

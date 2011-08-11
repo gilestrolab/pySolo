@@ -29,7 +29,7 @@ class Panel(PlotGrid):
                                          choiceList
                                          )
         self.name = 'Sleep Deprivation'
-        self.compatible = '0.6.5'
+        self.compatible = '0.9'
 
         self.AddOption('dep_thre', 'text', 0, ['80'], 'Utilize only flies that have at least this value of deprivation score (%)' )
 
