@@ -226,7 +226,7 @@ def sendMail(to, subject, text, files=[], server=None):
     smtpresult = smtp.sendmail(fro, to, msg.as_string() )
     smtp.close()
 
-def createDayDir(rootpath, date):
+def createDayDir(rootpath, date, overwrite=False):
     """
     Creates a new directory based on given date. The structure of the
     directory is outputPath/yyyy/mm/mmdd/
@@ -238,7 +238,7 @@ def createDayDir(rootpath, date):
                                 str(date.month).zfill(2) + str(date.day).zfill(2)
                                 )
 
-    if os.path.exists(dirFullPath):
+    if os.path.exists(dirFullPath) and not overwrite:
         log.error ( 'The directory for %s already exists! Files were not overwritten.\n' % date )
         return ''
     else:
@@ -382,6 +382,8 @@ if __name__ == "__main__":
     parser.add_option('-d', '--date', dest='date', metavar="YYYY-MM-DD", help="Fetch data for specified date")
     parser.add_option('-p', '--period', dest='period', metavar="YYYY-MM-DD/YYYY-MM-DD", help="Fetch data for specified period")
     parser.add_option('-i', '--input', dest='path', metavar="PATH", help="Use specified path as inputpath")
+    parser.add_option('--overwrite', action="store_true", default=False, dest='overwrite', help="Write over currently existing files and directories")
+
     (options, args) = parser.parse_args()
 
     ### Getting date or period
@@ -419,7 +421,7 @@ if __name__ == "__main__":
 
     log.output( 'Using input directory %s' % inputPath )
     
-    filelist = glob.glob(os.path.join(inputPath, '*.txt') )          #extract the list of files in the dir inputPath
+    filelist = glob.glob(os.path.join(inputPath, '*.txt') )
     rootOutputPath = opts.GetOption('outputPath')
 
     ###
@@ -427,7 +429,7 @@ if __name__ == "__main__":
     for day in range(collectDays):
 
         log.output( 'Processing data for date: %s/%s/%s' % (startTime.year, startTime.month, startTime.day) )
-        outputPath = createDayDir(rootOutputPath, startTime)
+        outputPath = createDayDir(rootOutputPath, startTime, options.overwrite)
         
         if outputPath:
             if len(filelist) != len(monitors):
