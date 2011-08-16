@@ -89,11 +89,7 @@ def list2str(l, separator=' + '):
     Takes the items in a list and expand them in a string
     where items are separated by 'separator'
     """
-    out = ''
-    a = len(separator)
-    for i in l:
-        out += str(i) + separator
-    return out[:-a]
+    return separator.join ( [str(el) for el in l] )
 
 def CheckUpdatedVersion():
     """
