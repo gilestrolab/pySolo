@@ -15,6 +15,8 @@
 
 import os, datetime, smtplib, optparse, glob, re
 from zipfile import ZipFile, ZIP_DEFLATED
+import ConfigParser
+
 from time import mktime
 from email.MIMEMultipart import MIMEMultipart
 from email.MIMEBase import MIMEBase
@@ -25,9 +27,6 @@ from email import Encoders
 #Here we define some variables that are used all over the place
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug','Sep', 'Oct', 'Nov', 'Dec']
 __version__ = 0.9
-
-##from copyfiles_config_local import *
-import ConfigParser
 
 
 class cp_config():
@@ -45,19 +44,19 @@ class cp_config():
         
         self.config = None
 
-        self.defaultOptions = { "startTime" : ['09:00', "The time at which the day starts for flies"],
-                                "monitors" :  ['1-4', "The first and the last monitors of the series you want to use"],
-                                "cleanInput" : [False, "If True will remove the lines from the original files! Use with extreme caution!"],
-                                "correctErrors" : [False, "Used to add bins if some are lost"],
-                                "send_email" : [False, "Do we want to send an email with the script's summary?"],
-                                "SMTPmailserver" : ['smtp.mail.edu', "you need to specify your own SMTP server here. This will not work for you"],
-                                "email_rcpts" : ['your@email.com', "List of recipients. Separate using comma"],
-                                "attach_zipfile" : [True, "The zip file can be attached to the email"],
-                                "use_monFile" : [True, "Use TriKinetics monitor format"],
-                                "use_chanFile" : [False, "Use TriKinetics channel format"],
-                                "inputPath" : ['/', "The path to where your raw data are stored"],
-                                "outputPath" : ['/', "The path to where your processed data are stored"],
-                                "zipPath" : ['/', "The path to where the zipped files are stored"]
+        self.defaultOptions = { "startTime" : ['09:00', "The time at which the day starts for flies", 'text'],
+                                "monitors" :  ['1-4', "The first and the last monitors of the series you want to use", 'text'],
+                                "cleanInput" : [False, "If True will remove the lines from the original files! Use with extreme caution!", 'boolean'],
+                                "correctErrors" : [False, "Used to add bins if some are lost", 'boolean'],
+                                "send_email" : [False, "Do we want to send an email with the script's summary?", 'boolean'],
+                                "SMTPmailserver" : ['smtp.mail.edu', "you need to specify your own SMTP server here. This will not work for you", 'text'],
+                                "email_rcpts" : ['your@email.com', "List of recipients. Separate using comma", 'text'],
+                                "attach_zipfile" : [True, "The zip file can be attached to the email", 'boolean'],
+                                "use_monFile" : [True, "Use TriKinetics monitor format", 'boolean'],
+                                "use_chanFile" : [False, "Use TriKinetics channel format", 'boolean'],
+                                "inputPath" : ['/', "The path to where your raw data are stored", 'path'],
+                                "outputPath" : ['/', "The path to where your processed data are stored", 'path'],
+                                "zipPath" : ['/', "The path to where the zipped files are stored", 'path']
                                }
         self.Read()
         
