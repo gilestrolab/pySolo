@@ -1,4 +1,25 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+#       pysolo_anal.py
+#       
+#       Copyright 2011 Giorgio Gilestro <giorgio@gilest.ro>
+#       
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#       MA 02110-1301, USA.
+
 import wx, os, glob
 from pysolo_path import panelPath, imgPath
 os.sys.path.append(panelPath)
@@ -12,8 +33,6 @@ from wx.lib.splitter import MultiSplitterWindow
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.buttons import GenBitmapToggleButton
 import wx.lib.customtreectrl as CT
-
-#from pylab import *
 
 class ExportVariableSideBar(wx.Panel):
     """
@@ -752,7 +771,7 @@ class pySolo_AnalysisFrame(wx.Frame):
                 if cPanel != '':
                     NewPanel = __import__(cPanel)
                     self.Pages.append (NewPanel.Panel(self.nb))
-                    if self.Pages[-1].compatible > pySoloVersion:
+                    if self.Pages[-1].isCompatible():
                         self.nb.AddPage(self.Pages[-1], self.Pages[-1].name)
  
         else:
@@ -760,11 +779,12 @@ class pySolo_AnalysisFrame(wx.Frame):
             # the variable. New panels are added as visible as default
 
             for f in PanelList:
+                _,f = os.path.split(f)
                 module_name, ext = os.path.splitext(f) # Handles no-extension files, etc.
                 if ext == '.py' and module_name != 'default_panels': # Important, ignore .pyc/other files.
                     NewPanel = __import__(module_name)
                     self.Pages.append (NewPanel.Panel(self.nb))
-                    if self.Pages[-1].compatible == pySoloVersion:
+                    if self.Pages[-1].isCompatible():
                         self.nb.AddPage(self.Pages[-1], self.Pages[-1].name)
                     # for every panel check if an entry already exists in the user
                     # config variable and if it does not add a new one, last position
@@ -919,7 +939,7 @@ class pySolo_AnalysisFrame(wx.Frame):
         wx.EVT_MENU(self, ID_WIN_DB, self.onShowDatabase)
         #wx.EVT_MENU(self, ID_WIN_ANAL, self.onShowAnalysis)
         wx.EVT_MENU(self, ID_WIN_OPTIonS, self.onShowOptions)
-        #wx.EVT_MENU(self, ID_HELP_ABOUT, self.ToDo)
+        wx.EVT_MENU(self, ID_HELP_ABOUT, self.onAbout)
 
 #----------------------------------------- EVENTS -----------------------------------------------------------#
 
@@ -1146,6 +1166,19 @@ class pySolo_AnalysisFrame(wx.Frame):
         if new_version or (not new_version and not automatic):
             dlg = wx.MessageDialog(self, message , 'Searching for updates', wx.OK | wx.ICON_QUESTION)
             if dlg.ShowModal() == wx.ID_OK: dlg.Destroy()
+
+    def onAbout(self, event):
+        """
+        Shows the about dialog
+        """
+        about = 'pySolo - v %s\n' % pySoloVersion
+        about += 'by Giorgio F. Gilestro\n'
+        about += 'Visit http://www.pysolo.net for more information'
+        
+        dlg = wx.MessageDialog(self, about, 'About', wx.OK | wx.ICON_INFORMATION)
+        dlg.ShowModal()
+        dlg.Destroy()
+
 
     def onShowOptions(self, event):
         """
