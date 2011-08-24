@@ -1,5 +1,23 @@
-
-#from pySolo_lib import *
+# -*- coding: utf-8 -*-
+#
+#       default_panels.py
+#       
+#       Copyright 2011 Giorgio Gilestro <giorgio@gilest.ro>
+#       
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#       MA 02110-1301, USA.
 
 import sys
 sys.path.append('..')
@@ -17,8 +35,6 @@ import matplotlib as mpl
 
 import wx.lib.newevent
 myEVT_OPTIONSB_SHOW_HIDE, EVT_OPTIONSB_SHOW_HIDE = wx.lib.newevent.NewCommandEvent()
-
-
 
 
 class FileDrop(wx.FileDropTarget):
@@ -1188,6 +1204,12 @@ class pySoloPanel(wx.Panel):
         Place in the dictionary the data concerning an exportable variable
         '''
         GUI['canExport'][var_name] = ExportVariable(self.name, variable, var_name, var_description)
+
+    def isCompatible(self):
+        """
+        """
+        return (pySoloVersion == 'dev') or (self.compatible >= pySoloVersion)
+
 
 class GridGrid(pySoloPanel):
     '''This is the panel composed of n Grid, one above each other.
