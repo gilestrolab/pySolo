@@ -1,26 +1,24 @@
 #!/usr/bin/env python
-# ################################################################# #
-#                                                                   #
-# pySolo_lib                                                          #
-# This file contains function of general use for the pySolo program   #
-# None of the contents of this file should be modified by the user  #
-# for proper functioning of the software.                           #
-# Please visit the website for more information:                    #
-# http://www.pysolo.net                               #
-#                                                                   #
-# ################################################################# #
-#                                                                   #
-# As of 10/31/2008 working fine with:                                #
-# pySolo version: 0.3
-# Python version: 2.5.2 (r252:60911, Oct  5 2008, 19:24:49) 
-# [GCC 4.3.2]
-# wxPython version: 2.8.8.0
-# wxmpl version: 1.2.9-custom
-# matplotlib version: 0.98.3
-# numpy version: 1.1.1
-# scipy version: 0.6.0                                                  #
-#                                                                   #
-# ################################################################# #
+# -*- coding: utf-8 -*-
+#
+#       pysolo_lib.py
+#       
+#       Copyright 2011 Giorgio Gilestro <giorgio@gilest.ro>
+#       
+#       This program is free software; you can redistribute it and/or modify
+#       it under the terms of the GNU General Public License as published by
+#       the Free Software Foundation; either version 2 of the License, or
+#       (at your option) any later version.
+#       
+#       This program is distributed in the hope that it will be useful,
+#       but WITHOUT ANY WARRANTY; without even the implied warranty of
+#       MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#       GNU General Public License for more details.
+#       
+#       You should have received a copy of the GNU General Public License
+#       along with this program; if not, write to the Free Software
+#       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#       MA 02110-1301, USA.
 
 
 import os, cPickle, datetime
