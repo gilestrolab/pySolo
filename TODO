@@ -1,0 +1,30 @@
+TODO
+====
+
+GENERAL
+# Create a proper logger
+
+DATABASE
+
+
+ANALYSIS 
+
+#. Add filter/panels
+#. Write a number of mask safe statistical functions
+#. Check that everything will work without GUI
+#. Insert video?
+#. Insert Circadian?
+
+PANELS
+
+#. sleep latency
+#. longevity
+#. survival table
+
+OPTIONS
+# Fix the way options are handle
+
+
+WEBSITE
+
+
