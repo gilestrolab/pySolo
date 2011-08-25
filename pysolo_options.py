@@ -365,7 +365,10 @@ class OptionsVideoPanel(wx.ScrolledWindow):
             sz1.Fit(self)
 
         def OnChangeSleepValues(self, key, event):
-            self.temp_userconfig[key] = int( event.EventObject.GetValue() )
+            try:
+                self.temp_userconfig[key] = int( n )
+            except:
+                pass
 
         def OnGroupSelect( self, key, event ):
             self.temp_userconfig[key] = (event.EventObject.GetName() == key)
@@ -426,7 +429,11 @@ class OptionsSleepPanel(wx.ScrolledWindow):
             sz1.Fit(self)
 
         def OnChangeSleepValues(self, key, event):
-            self.temp_userconfig[key] = int( event.EventObject.GetValue() )
+            try:
+                self.temp_userconfig[key] = int( event.EventObject.GetValue() )
+            except:
+                pass
+            
 
         def OnGroupSelect( self, key, event ):
             self.temp_userconfig[key] = (event.EventObject.GetName() == key)
