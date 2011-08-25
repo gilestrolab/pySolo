@@ -25,7 +25,7 @@ from email.Utils import COMMASPACE, formatdate
 from email import Encoders
 
 #Here we define some variables that are used all over the place
-months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug','Sep', 'Oct', 'Nov', 'Dec']
+MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug','Sep', 'Oct', 'Nov', 'Dec']
 __version__ = 0.9
 
 
@@ -277,7 +277,7 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
             line = singleLine.split('\t')   #split contents by tabs
             d, t = re.split('\W+', line[1]), re.split('\W+', line[2]) #split date and time
             lineDate = datetime.datetime(   2000+int(d[2]),               #year
-                                              months.index(d[1])+1,     #month as number
+                                              MONTHS.index(d[1])+1,     #month as number
                                               int(d[0]),                 #day
                                               int(t[0]),                  #hour
                                               int(t[1]),                 #minute
@@ -337,7 +337,7 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
 
         ch_matrix = zip(*ch_matrix_r)
 
-        t_date = '%s %s %s' % (dd, months[int(mm)-1], startTime.year)
+        t_date = '%s %s %s' % (dd, MONTHS[int(mm)-1], startTime.year)
 
         for channel in ch_matrix:
 
@@ -409,8 +409,10 @@ if __name__ == "__main__":
     ###
     
     ### Getting input Files, output path and monitors to collect
-
-    m_s, m_e = [ int(v) for v in opts.GetOption('monitors').split('-') ]
+    try:
+        m_s, m_e = [ int(v) for v in opts.GetOption('monitors').split('-') ]
+    except:
+        m_s = m_e = opts.GetOption('monitors')
     monitors = range(m_s, m_e + 1)
 
     if options.path and os.path.exists(options.path):
