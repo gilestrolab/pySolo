@@ -205,6 +205,8 @@ def sendMail(to, subject, text, server, username=None, password=None, files=[]):
     assert type(files)==list
     fro = 'The FlyDAM Data'
 
+    isGmail = 'gmail' in server or 'google' in server
+
     msg = MIMEMultipart()
     msg['From'] = fro
     msg['To'] = COMMASPACE.join(to)
@@ -223,8 +225,13 @@ def sendMail(to, subject, text, server, username=None, password=None, files=[]):
                             % os.path.basename(file))
             msg.attach(part)
 
-    smtp = smtplib.SMTP(server)
+
+    port = [25, 587][isGmail*1]
+    smtp = smtplib.SMTP(server, port)
+    
+    if isGmail: smtp.ehlo(); smtp.starttls(); smtp.ehlo()
     if username and password: smtp.login(username, password)
+    
     smtpresult = smtp.sendmail(fro, to, msg.as_string() )
     smtp.close()
 
@@ -433,7 +440,7 @@ if __name__ == "__main__":
     mail_send = opts.GetOption('send_email')
     mail_attach = opts.GetOption('attach_zipfile')
 
-    mail_rcpt = opts.GetOption('email_rcpts')
+    mail_rcpt = [opts.GetOption('email_rcpts')]
     mail_server = opts.GetOption('SMTPmailserver')
     mail_username = opts.GetOption('email_username') or None
     mail_password = opts.GetOption('email_password') or None
