@@ -50,6 +50,8 @@ class cp_config():
                                 "correctErrors" : [False, "Used to add bins if some are lost", 'boolean'],
                                 "send_email" : [False, "Do we want to send an email with the script's summary?", 'boolean'],
                                 "SMTPmailserver" : ['smtp.mail.edu', "you need to specify your own SMTP server here. This will not work for you", 'text'],
+                                "email_username" : ['', "Credentials for your smtp account", 'text'],
+                                "email_password" : ['', "Credentials for your smtp account", 'password'],
                                 "email_rcpts" : ['your@email.com', "List of recipients. Separate using comma", 'text'],
                                 "attach_zipfile" : [True, "The zip file can be attached to the email", 'boolean'],
                                 "use_monFile" : [True, "Use TriKinetics monitor format", 'boolean'],
@@ -193,7 +195,7 @@ def zipFile(path, zipFileName):
         zip.close()
 
 
-def sendMail(to, subject, text, files=[], server=None):
+def sendMail(to, subject, text, server, username=None, password=None, files=[]):
     """
     send an email containing the error message. A file could also be attached
     using this function
@@ -222,6 +224,7 @@ def sendMail(to, subject, text, files=[], server=None):
             msg.attach(part)
 
     smtp = smtplib.SMTP(server)
+    if username and password: smtp.login(username, password)
     smtpresult = smtp.sendmail(fro, to, msg.as_string() )
     smtp.close()
 
@@ -426,6 +429,14 @@ if __name__ == "__main__":
     rootOutputPath = opts.GetOption('outputPath')
 
     ###
+    
+    mail_send = opts.GetOption('send_email')
+    mail_attach = opts.GetOption('attach_zipfile')
+
+    mail_rcpt = opts.GetOption('email_rcpts')
+    mail_server = opts.GetOption('SMTPmailserver')
+    mail_username = opts.GetOption('email_username') or None
+    mail_password = opts.GetOption('email_password') or None
 
     for day in range(collectDays):
 
@@ -457,10 +468,13 @@ if __name__ == "__main__":
         
         log.write( outputPath )
 
-        if opts.GetOption('send_email') and opts.GetOption('attach_zipfile'):
-            sendMail(opts.GetOption('email_rcpts'), '[DAM Data] %s' % startTime, log.getLog(), [zipFileName], server=opts.GetOption('SMTPmailserver'))
-        elif opts.GetOption('send_email') and not opts.GetOption('attach_zipfile'):
-            sendMail(opts.GetOption('email_rcpts'), '[DAM Data] %s' % startTime, log.getLog(), server=opts.GetOption('SMTPmailserver'))
+        if mail_attach:
+            mail_attachzip = [zipFileName]
+        else:
+            mail_attachzip = []
+        
+        if mail_send:
+            sendMail(mail_rcpt, '[DAM Data] %s' % startTime, log.getLog(), files=mail_attachzip, server=mail_server, username=mail_username, password=mail_password)
 
         startTime += datetime.timedelta(days=1)
 
