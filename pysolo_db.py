@@ -914,7 +914,7 @@ class pySolo_DBFrame(wx.Frame):
                                     
             datatype = userConfig['DAMtype'] #Channel, Monitor, pvg_distance, pvg_beam
 
-            if datatype == 'Monitor' or datatype == 'pvg_beam' or 'pvg_distance':
+            if datatype == 'Monitor' or datatype == 'pvg_beam' or datatype == 'pvg_distance':
                 self.LoadRawDataMonitor(inputPath, checkOnlyFiles)
             elif datatype == 'Channel' and GUI['datatype'] == 'TANK':
                 self.LoadRawDataTank(inputPath, checkOnlyFiles)
