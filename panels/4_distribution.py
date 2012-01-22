@@ -26,7 +26,7 @@ class Panel(PlotGrid):
                                          dataTypes,
                                          choiceList)
         self.name = 'Distribution'
-        self.compatible = '0.9'
+        self.compatible = 'all'
 
 #-----------------------------------------------
 

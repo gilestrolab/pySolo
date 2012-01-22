@@ -1208,7 +1208,7 @@ class pySoloPanel(wx.Panel):
     def isCompatible(self):
         """
         """
-        return (pySoloVersion == 'dev') or (self.compatible >= pySoloVersion)
+        return (pySoloVersion == 'dev') or (self.compatible >= pySoloVersion) or (self.compatible == 'all')
 
 
 class GridGrid(pySoloPanel):

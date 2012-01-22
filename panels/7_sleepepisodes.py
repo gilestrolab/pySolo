@@ -27,7 +27,7 @@ class Panel(PlotGrid):
                                          #choiceList
                                          )
         self.name = 'Sleep Episodes'
-        self.compatible = '0.9'
+        self.compatible = 'all'
 
 #-----------------------------------------------
 

@@ -16,7 +16,7 @@ class Panel(PlotGrid): #Class name must be Panel
 
         PanelProportion = [6,2,1]
 
-        CanvasInitialSize = (-1,-1)# size in inches or userDefined (-1,-1)
+        CanvasInitialSize = (12,12)# size in inches or userDefined (-1,-1)
 
         colLabels = ['Genotype','Day','Mon','Ch','n(tot)','n(a)','sleep TD','st.dv.','sleep RD','st.dv.','sleep RN','st.dv.','AI','st.dv','color' ]
         dataTypes = [gridlib.GRID_VALUE_STRING] * 4 + [gridlib.GRID_VALUE_NUMBER] *2 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 8 + [gridlib.GRID_VALUE_STRING]
@@ -29,12 +29,12 @@ class Panel(PlotGrid): #Class name must be Panel
                                          #choiceList
                                          )
         self.name = 'Browser'
-        self.compatible = '0.9'
+        self.compatible = 'all'
 
 
         self.AddOption('use_grid', 'boolean', 1, ['Draw grid', 'Do not draw grid'], 'Do you want to draw a cartesian grid in the graph?')
         self.AddOption('zeitgeber', 'radio', 0, ['Hours', 'Minutes'], 'Would you like to indicate the zeitgeber in hours or minutes?')
-        self.AddOption('Yactivity', 'radio', 3, ['Max (dynamic)', '15', '10', '5'], 'Set the upper limit for the Y axis on the Activity plot')
+        self.AddOption('Yactivity', 'radio', 0, ['Normalized','Max (dynamic)', '15', '10', '5'], 'Set the upper limit for the Y axis on the Activity plot')
         self.AddOption('sync_graphs', 'boolean', 0, ['Sync', 'Do not Sync'], 'Do you want to sync the coordinates on all graphs?\ni.e.: when you zoom in one, the others are zoomed accordingly')
         self.AddOption('sleep_y_limit', 'text', 0, ['30'], 'Set the upper limit for the Y axis on the Sleep plot')
         self.AddOption('show_error', 'radio', 2, ['Only above', 'Only below', 'Both sides'], 'On what sides do we want to show the error bar?')
@@ -190,7 +190,8 @@ class Panel(PlotGrid): #Class name must be Panel
         # x and y indicate distance from the bottom left corner (from 0 to 1)
         # w, h are the width and height of the graph (0 to 1, 1 means as big as the whole canvas)
         #
-        a4 = fig.add_axes([0.08, 0.08, 0.98, 0.03], yticks=[])
+        lm = 0.08 ; rm = 0.9
+        a4 = fig.add_axes([lm, 0.08, rm, 0.03], yticks=[])
 
         #Draw the light/dark bar at the very bottom
         light_pattern = [[0]*(DayLength/2)+[1]*(DayLength/2),]
@@ -212,16 +213,18 @@ class Panel(PlotGrid): #Class name must be Panel
         ipno[indices] = 1
         ipno = ipno,
 
-        if sync: a3 = fig.add_axes([0.08, 0.12, 0.98, 0.1], yticks=[], sharex=a4)
-        else: a3 = fig.add_axes([0.08, 0.12, 0.98, 0.1], yticks=[])
+        if sync: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[], sharex=a4)
+        else: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[])
         
         a3.imshow(ipno, aspect='auto', cmap=mpl.cm.binary, interpolation='nearest')
 
         mpl.artist.setp( a3.get_xticklabels(), visible=False)
 
         #Draw the Activity plot
-        if sync: a1 = fig.add_axes([0.08, 0.60, 0.98, 0.3], sharex=a4)
-        else:  a1 = fig.add_axes([0.08, 0.60, 0.98, 0.3])
+        if sync: a1 = fig.add_axes([lm, 0.60, rm, 0.3], sharex=a4)
+        else:  a1 = fig.add_axes([lm, 0.60, rm, 0.3])
+
+        if activity_limit == 'Normalized': activity = activity / activity.mean()
 
         if activity_bin > 1:
             pos = range(0,DayLength,activity_bin)
@@ -237,7 +240,7 @@ class Panel(PlotGrid): #Class name must be Panel
         a1.set_ylabel('Activity Plot')
         a1.set_xlim((0, len(activity)))
 
-        if activity_limit != 'Max (dynamic)':
+        if activity_limit != 'Max (dynamic)' and activity_limit != 'Normalized':
             activity_limit = int(activity_limit)
             a1.set_ylim((0, activity_limit))
 
@@ -245,8 +248,8 @@ class Panel(PlotGrid): #Class name must be Panel
 
 
         #Draw the daily sleep graph
-        if sync: a2 = fig.add_axes([0.08, 0.25, 0.98, 0.3], sharex=a4)
-        else: a2 = fig.add_axes([0.08, 0.25, 0.98, 0.3])
+        if sync: a2 = fig.add_axes([lm, 0.25, rm, 0.3], sharex=a4)
+        else: a2 = fig.add_axes([lm, 0.25, rm, 0.3])
         
         a2.plot(sleep, color=col)
 

@@ -26,7 +26,7 @@ class Panel(PlotGrid):
                                          #choiceList
                                          )
         self.name = 'Activity Peak'
-        self.compatible = '0.9'
+        self.compatible = '0.9.1'
         
         self.AddOption('Yactivity', 'radio', 0, ['Max (dynamic)', '15', '10', '5'], 'Set the upper limit for the Y axis on the Activity plot')
         self.AddOption('mask_left', 'radio', 16, range(48), 'Set the left limit to look for the activity peak')

@@ -31,7 +31,7 @@ class Panel(PlotGrid): #Class name must be Panel
                                          choiceList
                                          )
         self.name = 'Screen'
-        self.compatible = '0.9'
+        self.compatible = '0.9.1'
         
         self.AddOption('use_first_day', 'boolean', 1, ['Use first day', 'Do not use first day'], 'Do you want to include data from the first day?')
 

@@ -13,7 +13,7 @@ class Panel(PlotGrid):
     def __init__(self, parent):
 
         PanelProportion = [6,2,1]    #0 = not_show
-        CanvasInitialSize = (12,12)     #size in inches
+        CanvasInitialSize = (-1,-1)     #size in inches
 
         colLabels = ['Genotype','Day','Mon','Ch','n(tot)','n(a)','sleep TD','st.dv.','sleep RD','st.dv.','sleep RN','st.dv.','AI','','st.dv','','color' ]
         dataTypes = [gridlib.GRID_VALUE_STRING] * 4 + [gridlib.GRID_VALUE_NUMBER] *2 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 10 + [gridlib.GRID_VALUE_STRING]
@@ -26,7 +26,7 @@ class Panel(PlotGrid):
                                          #choiceList
                                          )
         self.name = 'Day By Day'
-        self.compatible = '0.9'
+        self.compatible = 'all'
 
         self.AddOption('Yactivity', 'radio', 3, ['Max (dynamic)', '15', '10', '5'], 'Set the upper limit for the Y axis on the Activity plot')
 
