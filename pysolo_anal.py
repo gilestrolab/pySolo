@@ -32,7 +32,7 @@ import wx.lib.filebrowsebutton as filebrowse
 from wx.lib.splitter import MultiSplitterWindow
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.buttons import GenBitmapToggleButton
-import wx.lib.customtreectrl as CT
+import wx.lib.agw.customtreectrl as CT
 
 class ExportVariableSideBar(wx.Panel):
     """
@@ -400,7 +400,7 @@ class NavigationTree(CT.CustomTreeCtrl):
 
     def __init__(self, parent):
 
-        CT.CustomTreeCtrl.__init__(self, parent, style= wx.TR_MULTIPLE |
+        CT.CustomTreeCtrl.__init__(self, parent, agwStyle= wx.TR_MULTIPLE |
                                                  wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_DEFAULT_STYLE )
         self.parent = parent
         self.KeyDown = ''
