@@ -1329,7 +1329,7 @@ class pySolo_DBFrame(wx.Frame):
     def LoadRawDataMonitor(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
         """
         Takes the data from the folder where the raw data are placed
-        Uses the one file one channel syntax
+        Uses the one file one monitor syntax
         """
 
         year = month = day = monitor = channel = ''
@@ -1400,10 +1400,10 @@ class pySolo_DBFrame(wx.Frame):
                                         while '\n' in line: line = line.replace('\n', '')
                                         while '\r' in line: line = line.replace('\r', '')
                                         try:
-                                            rawData[c] = [ int(i) for i in line.split('\t')[10:] ]
+                                            rawData[c] = [ int(float(i)) for i in line.split('\t')[10:] ]
                                             c += 1
                                         except:
-                                            print 'Error with file %s at row number %s' % (filename, c)
+                                            print 'Error with file %s at row number %s. Wrong data type?' % (filename, c)
 
                                     DAMf.close()
 
