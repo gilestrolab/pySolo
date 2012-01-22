@@ -267,6 +267,10 @@ class OptionsFilesFolderPanel(wx.ScrolledWindow):
             self.DAM_version_radio.append( wx.RadioButton( self, -1, 'Trikinetics - Monitor Files', name = 'Monitor' ) )
             self.DAM_version_radio.append( wx.RadioButton( self, -1, 'pySolo Video - Distance', name = 'pvg_distance' ) )
             self.DAM_version_radio.append( wx.RadioButton( self, -1, 'pySolo Video - Virtual Beam Split', name = 'pvg_beam' ) )
+            self.DAM_version_radio.append( wx.RadioButton( self, -1, 'pySolo Video - Raw Data', name = 'pvg_raw' ) )
+            
+            #not active yet
+            self.DAM_version_radio[-1].Enable(False)
 
             for radio in self.DAM_version_radio:
                 grid1.Add( radio, 0, wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP, 5 )
