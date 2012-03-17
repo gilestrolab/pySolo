@@ -26,6 +26,7 @@ import os, datetime, smtplib
 from email.mime.text import MIMEText
 from email.MIMEMultipart import MIMEMultipart
 import numpy as np
+import serial
 
 class DAMrealtime():
     def __init__(self, path, email=None):
@@ -79,15 +80,25 @@ class DAMrealtime():
         return sleepDep
         
     
-    def deprive(self, fname, port, interval=5):
+    def deprive(self, fname, port, interval=5, baud=57600):
         '''
         check which flies are asleep and send command to arduino
         connected on serial port
         '''
-            
-        asleep = self.getAsleep(fname, interval)
-
         
+        asleep = self.getAsleep(fname, interval)
+        command = [str(n+1) for (n,a) in enumerate(asleep) if a] 
+        command = '\n'.join(command)
+        
+        try:
+                ser = serial.Serial(port, baud)
+                ser.write(commmand)
+                ser.close()
+        except:
+                print 'Error communicating with the serial port!'
+                os.sys.exit(404)
+        
+        return command
 
     def listFiles(self, prefix='Monitor'):
         '''
@@ -98,8 +109,17 @@ class DAMrealtime():
         Monitor01.txt   Monitor
         MON01.txt       MON
         '''
-        dirList=os.listdir(self.path)
-        l = [os.path.join(self.path, f) for f in dirList if prefix in f]
+        
+        l = ''
+        
+        if not os.path.isfile(self.path):
+                dirList=os.listdir(self.path)
+                l = [os.path.join(self.path, f) for f in dirList if prefix in f]
+        
+        elif prefix in self.path:
+                l = [self.path]
+                
+                
         return l
 
     def alert(self, problems):

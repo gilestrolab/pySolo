@@ -25,9 +25,14 @@
 from DAMrealtime import DAMrealtime
 
 
-serial = '/dev/ttyUSB0'
-path = '/home/gg/Desktop/DAM'
+serial_port = '/dev/ttyUSB0'
+
+#fullpath to a single monitor file (or to of a folder containing all monitors)
+path = '/home/gg/Desktop/test/Monitor1.txt'
+#path = '/home/gg/Desktop/DAM'
+
 
 r = DAMrealtime(path=path)
+
 for fname in r.listFiles():
-    r.deprive(fname)
+    r.deprive(fname, port=serial_port)
