@@ -27,20 +27,36 @@ from email.mime.text import MIMEText
 from email.MIMEMultipart import MIMEMultipart
 import numpy as np
 import serial
+from time import strptime
 
 class DAMrealtime():
     def __init__(self, path, email=None):
         '''
         '''
         
-        self.path = path
+        self.path = os.path.join(path, 'DAMSystem3Data')
+        self.flymon_path = os.path.join(path, 'flymons')
         
         if email:
             self.email_sender = email['sender']
             self.email_recipient = email['recipient']
             self.email_server = email['server']
+            
+            
+        self.env = dict (min_temperature = 16,
+                    max_temperature = 30,
+                    min_humidity = 5,
+                    max_humidity = 90,
+                    min_day_light = 100,
+                    max_night_light = 10,
+                    dawn = '08:00',
+                    dusk = '20:00'
+                    )
+                    
+                    
+                    
 
-    def getStatus(self, filename):
+    def getDAMStatus(self, filename):
         '''
         scan given filename and return last recorded monitor status
         '''
@@ -51,6 +67,34 @@ class DAMrealtime():
         value = lastline.split('\t')[3]
         
         return value
+        
+    def hasEnvProblem(self, filename):
+        '''
+        1	09 Dec 11	19:02:19	m	t1	h1	l1	t2	bat
+        '''
+        fh = open (filename, 'r')
+        lastline = fh.read().strip().split('\n')[-2]
+        fh.close()
+        
+        count, date, time, mid, t1, h1, l1, t2, bat = lastline.split('\t')
+        
+        rec_time = strptime(date + ' ' + time, '%d %b %Y %H:%M:%S')
+        dusk = strptime (self.env['dusk'], '%H:%M')
+        dawn = strptime (self.env['dawn'], '%H:%M')
+        
+        
+        isNight = rec_time.tm_hour > dusk.tm_hour and rec_time.tm_min > dusk.tm_min
+        isDay = not isNight
+        
+        temperature_problem = float(t1) < self.env['min_temperature'] or float(t1) > self.env['max_temperature']
+        humidity_problem = float(h1) < self.env['min_humidity'] or float(h1) > self.env['max_humidity']
+        light_problem = isNight and int(l1) > self.env['max_night_light'] or isDay and int(l1) < self.env['min_day_light']
+        
+        if temperature_problem or humidity_problem or light_problem:
+                return count, date, time, mid, t1, h1, l1, t2, bat
+        else:
+                return False
+        
 
     def getAsleep(self, filename, interval=5):
         '''
@@ -78,6 +122,8 @@ class DAMrealtime():
         sleepDep = asleep - dead
         
         return sleepDep
+
+
         
     
     def deprive(self, fname, port, interval=5, baud=57600):
@@ -100,7 +146,23 @@ class DAMrealtime():
         
         return command
 
-    def listFiles(self, prefix='Monitor'):
+    def __listFiles(self, path, prefix):
+        '''
+        '''
+        l = ''
+        
+        if not os.path.isfile(path):
+                dirList=os.listdir(path)
+                l = [os.path.join(path, f) for f in dirList if prefix in f]
+        
+        elif prefix in path:
+                l = [path]
+                
+        return l
+
+
+
+    def listDAMMonitors(self, prefix='Monitor'):
         '''
         list all monitor files in the specified path.
         prefix should match the file name
@@ -110,17 +172,18 @@ class DAMrealtime():
         MON01.txt       MON
         '''
         
-        l = ''
+        return self.__listFiles(self.path, prefix)
         
-        if not os.path.isfile(self.path):
-                dirList=os.listdir(self.path)
-                l = [os.path.join(self.path, f) for f in dirList if prefix in f]
-        
-        elif prefix in self.path:
-                l = [self.path]
-                
-                
-        return l
+
+    def listEnvMonitors(self, prefix='flymon'):
+        '''
+        list all monitor files in the Environmental monitors path.
+        prefix should match the file name
+        filename        prefix
+        '''
+
+        return self.__listFiles(self.flymon_path, prefix)
+
 
     def alert(self, problems):
         '''
@@ -142,7 +205,7 @@ class DAMrealtime():
        
         msg = MIMEMultipart()
         msg['From'] = 'Fly Dam Alert service'
-        msg['To'] = ','.join( self.email_recipient )
+        msg['To'] =  self.email_recipient
         msg['Subject'] = 'flyDAM alert!'
 
 
@@ -150,12 +213,12 @@ class DAMrealtime():
             text = MIMEText(message, 'plain')
             msg.attach(text)
 
-            s = smtplib.SMTP(email_server)
+            s = smtplib.SMTP(self.email_server)
             s.sendmail( self.email_sender, self.email_recipient, msg.as_string() )
             s.quit()
 
             print msg.as_string()
 
-        except SMTPException:
+        except smtplib.SMTPException:
            print "Error: unable to send email"
 
