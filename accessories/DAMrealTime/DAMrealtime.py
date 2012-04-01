@@ -30,12 +30,15 @@ import serial
 from time import strptime
 
 class DAMrealtime():
-    def __init__(self, path, email=None):
+    def __init__(self, path, email=None, useEnvironmental=False):
         '''
         '''
         
-        self.path = os.path.join(path, 'DAMSystem3Data')
-        self.flymon_path = os.path.join(path, 'flymons')
+        #self.path = os.path.join(path, 'DAMSystem3Data')
+        self.path = os.path.join(path, 'videoDAM')
+        
+        if useEnvironmental:
+                self.flymon_path = os.path.join(path, 'flymons')
         
         if email:
             self.email_sender = email['sender']
@@ -110,6 +113,9 @@ class DAMrealtime():
         lastlines = fh.read().split('\n')[ - (2+interval_for_dead) : -2]
         fh.close()
         
+        isSDMonitor = lastlines[-1][5]
+        #monitorNumber = lastlines[-1][6]
+        
         activity = np.array( [ line.split('\t')[10:] for line in lastlines ], dtype=np.int )
         
         # dead because they didn't move for the past 30 mins
@@ -126,25 +132,17 @@ class DAMrealtime():
 
         
     
-    def deprive(self, fname, port, interval=5, baud=57600):
+    def deprive(self, fname, interval=5):
         '''
         check which flies are asleep and send command to arduino
         connected on serial port
         '''
         
-        asleep = self.getAsleep(fname, interval)
-        command = [str(n+1) for (n,a) in enumerate(asleep) if a] 
-        command = '\n'.join(command)
+        monitor = int (os.path.split(fname)[1].split('.')[0][-2:])
+        flies = self.getAsleep(fname, interval)
+        cmd = ['M %02d %02d' % (monitor, channel+1) for (channel,sleeping) in enumerate(flies) if sleeping] 
         
-        try:
-                ser = serial.Serial(port, baud)
-                ser.write(commmand)
-                ser.close()
-        except:
-                print 'Error communicating with the serial port!'
-                os.sys.exit(404)
-        
-        return command
+        return '\n'.join(cmd)
 
     def __listFiles(self, path, prefix):
         '''

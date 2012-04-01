@@ -23,16 +23,24 @@
 #  
 
 from DAMrealtime import DAMrealtime
+from time import sleep
+import serial
 
+use_serial = True
 
-serial_port = '/dev/ttyUSB0'
+if use_serial: 
+    ser = serial.Serial('/dev/ttyACM0', 57600)
+    sleep(2)
 
 #fullpath to a single monitor file (or to of a folder containing all monitors)
-path = '/home/gg/Desktop/test/Monitor1.txt'
-#path = '/home/gg/Desktop/DAM'
+path = '/home/gg/Desktop/DAMS/'
 
 
 r = DAMrealtime(path=path)
 
-for fname in r.listFiles():
-    r.deprive(fname, port=serial_port)
+for fname in r.listDAMMonitors():
+    command = r.deprive(fname)
+    print command
+    if use_serial: ser.write(command)
+
+if use_serial: ser.close()

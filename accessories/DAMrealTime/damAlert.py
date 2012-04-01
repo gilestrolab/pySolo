@@ -3,7 +3,7 @@
 #
 #  damAlert.py
 #  
-#  Copyright 2012 Giorgio Gilestro <gg@wolfson>
+#  Copyright 2012 Giorgio Gilestro <giorgio@gilest.ro>
 #  
 #  This program is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ email = dict (
               )
 
 
-d = DAMrealtime(path=base_path, email=email)
+d = DAMrealtime(path=base_path, email=email, useEnvironmental=True)
 
 DAM_problems = [( fname, d.getDAMStatus(fname) ) for fname in d.listDAMMonitors() if d.getDAMStatus(fname) == '50']
 ENV_problems = [( fname, d.hasEnvProblem(fname) ) for fname in d.listEnvMonitors() if d.hasEnvProblem(fname)]
