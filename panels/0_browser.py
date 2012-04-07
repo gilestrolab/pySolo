@@ -34,6 +34,7 @@ class Panel(PlotGrid): #Class name must be Panel
 
         self.AddOption('use_grid', 'boolean', 1, ['Draw grid', 'Do not draw grid'], 'Do you want to draw a cartesian grid in the graph?')
         self.AddOption('zeitgeber', 'radio', 0, ['Hours', 'Minutes'], 'Would you like to indicate the zeitgeber in hours or minutes?')
+        self.AddOption('invertlight', 'boolean', 1, ['Night First', 'Day First'], 'How do you want to plot the light cycle.')
         self.AddOption('Yactivity', 'radio', 0, ['Normalized','Max (dynamic)', '15', '10', '5'], 'Set the upper limit for the Y axis on the Activity plot')
         self.AddOption('sync_graphs', 'boolean', 0, ['Sync', 'Do not Sync'], 'Do you want to sync the coordinates on all graphs?\ni.e.: when you zoom in one, the others are zoomed accordingly')
         self.AddOption('sleep_y_limit', 'text', 0, ['30'], 'Set the upper limit for the Y axis on the Sleep plot')
@@ -167,6 +168,7 @@ class Panel(PlotGrid): #Class name must be Panel
         #recall values of panel specific options
         use_grid = self.GetOption('use_grid')
         zeitgeber = self.GetOption('zeitgeber')
+        invertlight = self.GetOption('invertlight')
         sync = self.GetOption('sync_graphs')
         sleep_lim = int(self.GetOption('sleep_y_limit'))
         error_direction = self.GetOption('show_error')
@@ -194,7 +196,12 @@ class Panel(PlotGrid): #Class name must be Panel
         a4 = fig.add_axes([lm, 0.08, rm, 0.03], yticks=[])
 
         #Draw the light/dark bar at the very bottom
-        light_pattern = [[0]*(DayLength/2)+[1]*(DayLength/2),]
+        
+        if invertlight:
+                light_pattern = [[1]*(DayLength/2)+[0]*(DayLength/2),]
+        else:
+                light_pattern = [[0]*(DayLength/2)+[1]*(DayLength/2),]
+                
         a4.imshow(light_pattern, aspect='auto', cmap=mpl.cm.binary, interpolation='nearest')
 
         if zeitgeber == 'Minutes':
