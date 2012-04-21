@@ -36,7 +36,7 @@ if use_serial:
 path = '/home/gg/Desktop/DAMS/'
 
 
-r = DAMrealtime(path=path)
+r = DAMrealtime(path=path, folderName='videoDAM')
 
 for fname in r.listDAMMonitors():
     command = r.deprive(fname)

@@ -30,12 +30,11 @@ import serial
 from time import strptime
 
 class DAMrealtime():
-    def __init__(self, path, email=None, useEnvironmental=False):
+    def __init__(self, path, email=None, useEnvironmental=False, folderName='DAMSystem3Data'):
         '''
         '''
         
-        #self.path = os.path.join(path, 'DAMSystem3Data')
-        self.path = os.path.join(path, 'videoDAM')
+        self.path = os.path.join(path, folderName)
         
         if useEnvironmental:
                 self.flymon_path = os.path.join(path, 'flymons')
@@ -113,19 +112,40 @@ class DAMrealtime():
         lastlines = fh.read().split('\n')[ - (2+interval_for_dead) : -2]
         fh.close()
         
-        isSDMonitor = lastlines[-1][5]
-        #monitorNumber = lastlines[-1][6]
-        
+        header = lastlines[0].split('\t')
+        trackType = int(header[5])
+        #isSDMonitor = int(header[6])
+        #monitorNumber = int(header[7])
+
         activity = np.array( [ line.split('\t')[10:] for line in lastlines ], dtype=np.int )
         
-        # dead because they didn't move for the past 30 mins
-        dead = ( activity.sum(axis=0) == 0 ) * 1
-        # didn't move in the past 5
-        asleep =  ( activity[-interval:].sum(axis=0) == 0 ) * 1
-        # did move in the past 5
-        awake = ( activity[-interval:].sum(axis=0) != 0 ) * 1
-        # asleep but not dead
-        sleepDep = asleep - dead
+        if trackType == 0: #Actual Distance
+
+                dead_threshold = 50
+                asleep_threshold = 10 * interval
+
+                dead = ( activity.sum(axis=0) <= dead_threshold ) * 1
+                asleep = ( activity[-interval:].sum(axis=0) <= asleep_threshold ) * 1
+                awake = ( activity[-interval:].sum(axis=0) > asleep_threshold ) * 1
+                sleepDep = asleep - dead
+
+                
+        elif trackType == 1: #Virtual Beam Crossing
+
+                dead_threshold = 50
+                asleep_threshold = 10 * interval
+
+                # dead because they didn't move for the past 30 mins
+                dead = ( activity.sum(axis=0) <= dead_threshold ) * 1
+                # didn't move in the past 5
+                asleep = ( activity[-interval:].sum(axis=0) <= asleep_threshold ) * 1
+                # did move in the past 5
+                awake = ( activity[-interval:].sum(axis=0) > asleep_threshold ) * 1
+                # asleep but not dead
+                sleepDep = asleep - dead
+                
+        elif trackType == 2: # Position of flies
+                sleepDep = 0
         
         return sleepDep
 
@@ -138,7 +158,8 @@ class DAMrealtime():
         connected on serial port
         '''
         
-        monitor = int (os.path.split(fname)[1].split('.')[0][-2:])
+        monitor = int ( filter(lambda x: x.isdigit(), os.path.split(fname)[1] ) )
+        
         flies = self.getAsleep(fname, interval)
         cmd = ['M %02d %02d' % (monitor, channel+1) for (channel,sleeping) in enumerate(flies) if sleeping] 
         
