@@ -26,7 +26,7 @@ from email import Encoders
 
 #Here we define some variables that are used all over the place
 MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug','Sep', 'Oct', 'Nov', 'Dec']
-__version__ = 0.9
+__version__ = 0.92
 
 
 class cp_config():
@@ -58,7 +58,8 @@ class cp_config():
                                 "use_chanFile" : [False, "Use TriKinetics channel format", 'boolean'],
                                 "inputPath" : ['/', "The path to where your raw data are stored", 'path'],
                                 "outputPath" : ['/', "The path to where your processed data are stored", 'path'],
-                                "zipPath" : ['/', "The path to where the zipped files are stored", 'path']
+                                "zipPath" : ['/', "The path to where the zipped files are stored", 'path'],
+                                "file_prefix" : [ 'Monitor', "Prefix of filenames", 'text']
                                }
         self.Read()
         
@@ -111,8 +112,9 @@ class cp_config():
             return r
         elif type(r) == type(True): #native boolean
             return r
-        elif type(r) == type(''):
-            r = r.split(',')
+        elif type(r) == type(''): #string
+            #r = r.split(',')
+            pass
         
         if len(r) == 2: #tuple
             r = tuple([int(i) for i in r]) # tuple
@@ -251,7 +253,10 @@ def createDayDir(rootpath, date, overwrite=False):
         log.error ( 'The directory for %s already exists! Files were not overwritten.\n' % date )
         return ''
     else:
-        os.makedirs(dirFullPath)
+        try:
+            os.makedirs(dirFullPath)
+        except:
+            pass
         return str(dirFullPath)
 
 def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, cleanInput=False):
@@ -285,8 +290,12 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
 
         for singleLine in inputfile: #goes through the file line by line
             line = singleLine.split('\t')   #split contents by tabs
-            d, t = re.split('\W+', line[1]), re.split('\W+', line[2]) #split date and time
-            lineDate = datetime.datetime(   2000+int(d[2]),               #year
+            try:
+                d, t = re.split('\W+', line[1]), re.split('\W+', line[2]) #split date and time
+            except:
+                print line
+            
+            lineDate = datetime.datetime(    (int(d[2]) < 2000)*2000 + int(d[2]),               #year
                                               MONTHS.index(d[1])+1,     #month as number
                                               int(d[0]),                 #day
                                               int(t[0]),                  #hour
@@ -323,12 +332,13 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
 
     mm = str(startTime.month).zfill(2)
     dd = str(startTime.day).zfill(2)
-    mon = outFile[outFile.index('Monitor')+len('Monitor'):-4].zfill(3)
+    FT = FILE_PREFIX[0].upper()
+    mon = outFile[outFile.index(FILE_PREFIX)+len(FILE_PREFIX):-4].zfill(3)
 
 
     if dataType == 0: #Writes proper contents in Monitor files (1 file = 1 monitor)
 
-        outFile = outFile[:outFile.index('Monitor')] + '%s%sM%s.txt' % (mm, dd, mon)
+        outFile = outFile[:outFile.index(FILE_PREFIX)] + '%s%s%s%s.txt' % (mm, dd, FT, mon)
 
         try:
             outputfile = open(outFile, 'w')
@@ -360,7 +370,7 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
             header += '\n'
             ch +=1
 
-            ch_outFile = outFile[:outFile.index('Monitor')] + ch_filename + '.txt'
+            ch_outFile = outFile[:outFile.index(FILE_PREFIX)] + ch_filename + '.txt'
 
             try:
                 outputfile = open(ch_outFile, 'w')
@@ -382,7 +392,6 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
 if __name__ == "__main__":
 
     log = customLogger()
-    opts = cp_config('copyfiles.cfg')
 
     usage =  '%prog [options] [argument]\nNo options\t\tfetch yesterday\'s data with settings specified in config file'
     version= '%prog version ' + str(__version__)
@@ -391,11 +400,15 @@ if __name__ == "__main__":
     parser.add_option('-d', '--date', dest='date', metavar="YYYY-MM-DD", help="Fetch data for specified date")
     parser.add_option('-p', '--period', dest='period', metavar="YYYY-MM-DD/YYYY-MM-DD", help="Fetch data for specified period")
     parser.add_option('-i', '--input', dest='path', metavar="PATH", help="Use specified path as inputpath")
+    parser.add_option('-c', '--config', dest='cfg_file', metavar="CONFIG", help="Use specified config file")
     parser.add_option('--overwrite', action="store_true", default=False, dest='overwrite', help="Write over currently existing files and directories")
 
     (options, args) = parser.parse_args()
 
     ### Getting date or period
+
+    cfg_file = options.cfg_file or 'copyfiles.cfg'
+    opts = cp_config(cfg_file)
     
     startHour, startMinute = [int(v) for v in opts.GetOption('startTime').split(':')]
 
@@ -419,11 +432,19 @@ if __name__ == "__main__":
     ###
     
     ### Getting input Files, output path and monitors to collect
-    try:
-        m_s, m_e = [ int(v) for v in opts.GetOption('monitors').split('-') ]
-    except:
-        m_s = m_e = opts.GetOption('monitors')
-    monitors = range(m_s, m_e + 1)
+    monitors = []
+    mons = opts.GetOption('monitors').split(';')
+    FILE_PREFIX = opts.GetOption('file_prefix')
+    
+    for series in mons:
+        if '-' in series:
+            m_s, m_e = [ int(v) for v in series.split('-') ]
+        elif ',' in series:
+            m_s, m_e = [ int(v) for v in series.split(',') ]
+        else:
+            m_s = m_e = int(series)
+        monitors = list(set(monitors + range(m_s, m_e + 1)))
+    
 
     if options.path and os.path.exists(options.path):
         inputPath = options.path
@@ -432,7 +453,8 @@ if __name__ == "__main__":
 
     log.output( 'Using input directory %s' % inputPath )
     
-    filelist = glob.glob(os.path.join(inputPath, '*.txt') )
+    dam_filelist = glob.glob(os.path.join(inputPath, '%s*.txt' % FILE_PREFIX) )
+    #dam_filelist = [f for f in os.listdir(os.path.join(inputPath)) if FILE_PREFIX in f] 
     rootOutputPath = opts.GetOption('outputPath')
 
     ###
@@ -445,22 +467,24 @@ if __name__ == "__main__":
     mail_username = opts.GetOption('email_username') or None
     mail_password = opts.GetOption('email_password') or None
 
+
+    #DAM monitors
     for day in range(collectDays):
 
         log.output( 'Processing data for date: %s/%s/%s' % (startTime.year, startTime.month, startTime.day) )
         outputPath = createDayDir(rootOutputPath, startTime, options.overwrite)
         
         if outputPath:
-            if len(filelist) != len(monitors):
-                log.error ( 'Will not import all data: %s monitor(s) were found. Expecting %s\n' % ( len(filelist), len(monitors) ) )
+            if len(dam_filelist) < len(monitors):
+                log.error ( 'Will not import all data: %s monitor(s) were found. Expecting %s\n' % ( len(dam_filelist), len(monitors) ) )
 
-            for n, monFile in enumerate(filelist):
+            for n, monFile in enumerate(dam_filelist):
                 fname = os.path.split(monFile)[-1]
 
-                log.output ( 'Processing file %s/%s: %s' % (n+1, len(filelist), fname) )
+                log.output ( 'Processing file %s/%s: %s' % (n+1, len(dam_filelist), fname) )
                     
                 try:
-                    mon = int(fname[fname.index('Monitor')+len('Monitor'):-4])
+                    mon = int(fname[fname.index(FILE_PREFIX)+len(FILE_PREFIX):-4])
                 except:
                     log.error( 'Could not determine monitor number. Check that your files are properly named (e.g.: Monitor001.txt)' )
                 
@@ -468,6 +492,7 @@ if __name__ == "__main__":
                     processFile( monFile, os.path.join(outputPath, fname), startTime, correctErrors=opts.GetOption('correctErrors'), cleanInput=opts.GetOption('cleanInput') )
         else:
             log.error ( 'The output folder already exists! Process Aborted.' )
+
 
         zipFileName = str(startTime).split(' ')[0]+'.zip'
         zipFileName = os.path.join(opts.GetOption('zipPath'), zipFileName)
@@ -486,3 +511,4 @@ if __name__ == "__main__":
         startTime += datetime.timedelta(days=1)
 
 
+        
