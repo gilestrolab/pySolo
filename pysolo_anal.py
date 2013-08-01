@@ -219,12 +219,9 @@ class ExportVariableSideBar(wx.Panel):
         f = ['binary', 'text'].index(export_format)
         separator = ['','\t'][f] #empty separator means binary, otherwise a tab will be used for text files
 
-        try:
-            v = np.array(v[i]) #we need to unmask the array as tofile of masked arrays is not implemented yet
-            v.tofile(fpath, separator)
-            return True
-        except:
-            return False #something went wrong
+        unmasked_v = np.array(v[i]) #we need to unmask the array as tofile of masked arrays is not implemented yet
+        unmasked_v.tofile(fpath, separator)
+        return True
         
     def onBrowse(self, event):
         """
