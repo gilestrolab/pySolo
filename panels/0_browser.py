@@ -16,7 +16,7 @@ class Panel(PlotGrid): #Class name must be Panel
 
         PanelProportion = [6,2,1]
 
-        CanvasInitialSize = (12,12)# size in inches or userDefined (-1,-1)
+        CanvasInitialSize = (-1,-1)# size in inches or userDefined (-1,-1)
 
         colLabels = ['Genotype','Day','Mon','Ch','n(tot)','n(a)','sleep TD','st.dv.','sleep RD','st.dv.','sleep RN','st.dv.','AI','st.dv','color' ]
         dataTypes = [gridlib.GRID_VALUE_STRING] * 4 + [gridlib.GRID_VALUE_NUMBER] *2 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 8 + [gridlib.GRID_VALUE_STRING]
@@ -40,6 +40,7 @@ class Panel(PlotGrid): #Class name must be Panel
         self.AddOption('sleep_y_limit', 'text', 0, ['30'], 'Set the upper limit for the Y axis on the Sleep plot')
         self.AddOption('show_error', 'radio', 2, ['Only above', 'Only below', 'Both sides'], 'On what sides do we want to show the error bar?')
         self.AddOption('activity_bin', 'radio', 0, ['1', '5', '10', '15', '30', '60'], 'Plot activity in bin count of n minutes')
+        self.AddOption('show_hypno_group', 'boolean', 1, ['Show always', 'Show only on single flies'], 'When do you want to show the hypnogram?')
 
 
 
@@ -174,6 +175,7 @@ class Panel(PlotGrid): #Class name must be Panel
         error_direction = self.GetOption('show_error')
         activity_bin = int( self.GetOption('activity_bin') ) # 1,5,10,15,30,60 minutes
         activity_limit = self.GetOption('Yactivity')
+        show_hypno_group = self.GetOption('show_hypno_group')
 
         
         try:
@@ -215,23 +217,25 @@ class Panel(PlotGrid): #Class name must be Panel
             a4.set_xticklabels(range(0,25,3))
 
         #Draw the hypnogram at the bottom of the figure and the axis labels
-        ipno = np.zeros(DayLength)
-        indices = np.where(activity < 1)
-        ipno[indices] = 1
-        ipno = ipno,
+        if show_hypno_group:
 
-        if sync: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[], sharex=a4)
-        else: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[])
-        
-        a3.imshow(ipno, aspect='auto', cmap=mpl.cm.binary, interpolation='nearest')
+            ipno = np.zeros(DayLength)
+            indices = np.where(activity < 1)
+            ipno[indices] = 1
+            ipno = ipno,
 
-        mpl.artist.setp( a3.get_xticklabels(), visible=False)
+            if sync: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[], sharex=a4)
+            else: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[])
+                
+
+            a3.imshow(ipno, aspect='auto', cmap=mpl.cm.binary, interpolation='nearest')
+            mpl.artist.setp( a3.get_xticklabels(), visible=False)
 
         #Draw the Activity plot
         if sync: a1 = fig.add_axes([lm, 0.60, rm, 0.3], sharex=a4)
         else:  a1 = fig.add_axes([lm, 0.60, rm, 0.3])
 
-        if activity_limit == 'Normalized': activity = activity / activity.mean()
+        if activity_limit == 'Normalized': activity = activity / np.mean(activity)
 
         if activity_bin > 1:
             pos = range(0,DayLength,activity_bin)
