@@ -2,6 +2,7 @@
 
 import os
 from pysolo_path import panelPath, imgPath
+from convert import c2d
 os.sys.path.append(panelPath)
 
 from default_panels import CustTableGrid, gridlib, SavePreferenceFile, FileDrop
@@ -914,10 +915,13 @@ class pySolo_DBFrame(wx.Frame):
                                     
             datatype = userConfig['DAMtype'] #Channel, Monitor, pvg_distance, pvg_beam
 
-            if datatype == 'Monitor' or datatype == 'pvg_beam' or datatype == 'pvg_distance':
+            if datatype == 'Monitor' or datatype == 'pvg_beam':
                 self.LoadRawDataMonitor(inputPath, checkOnlyFiles)
-            elif datatype == 'Channel' and GUI['datatype'] == 'TANK':
-                self.LoadRawDataTank(inputPath, checkOnlyFiles)
+            elif datatype == 'pvg_distance':
+                self.LoadRawDataVideoDistance(inputPath, checkOnlyFiles)
+            elif datatype == 'pvg_beam':
+                self.LoadRawDataVideoBeam(inputPath, checkOnlyFiles)
+                
             elif datatype == 'Channel' and GUI['datatype'] == 'Regular':
                 self.LoadRawDataChannel(inputPath, checkOnlyFiles)
             elif datatype == 'Channel' and GUI['datatype'] == 'Video':
@@ -1326,7 +1330,7 @@ class pySolo_DBFrame(wx.Frame):
         elif count > 0:
             (keepGoing, skip) = self.dlgPD.Update(count, msg)
 
-    def LoadRawDataMonitor(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
+    def LoadRawDataVideoDistance(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
         """
         Takes the data from the folder where the raw data are placed
         Uses the one file one monitor syntax
@@ -1338,7 +1342,99 @@ class pySolo_DBFrame(wx.Frame):
         prev_filename = ''
         extension = userConfig['DAMextension']
 
+        #calculate how many flies we have to analize in total
+        totnum = 0
+        for row in self.DAM:
+            totnum += (row.totDays * row.totFlies)
 
+        #self.ProgressBarDlg(0,'Loading Raw Data')
+
+
+        for k in range(len(self.DAM)): # for every DAM
+
+                for d in range(self.DAM[k].totDays): # for every day
+                
+                    progress =  ( float(PDcount) / float(totnum) ) * 100.0  
+                    self.ProgressBarDlg( progress, 'Loading Raw Data.\n %s flies of %s processed.' % (PDcount, totnum) )
+
+                    day = '%02d' % self.DAM[k].getDatesRange()[0][d]
+                    month = '%02d' % self.DAM[k].getDatesRange()[1][d]
+                    year = '%s' % self.DAM[k].getDatesRange()[2][d]
+                    filepath = '%s/%s/%s%s/' % (year, month, month, day)
+                    
+                    
+
+                    for f in range (self.DAM[k].totFlies):
+                        if PDcount < 0: break
+                        
+                        monitor_name = '%03d' % int(self.DAM[k].rangeChannel[1][f])
+                        filename = '%s%sM%s%s' % (month, day, monitor_name, extension)
+                        fullpath = os.path.join(inputPath, filepath, filename)
+
+                        new_monitor = (filename != prev_filename); prev_filename = filename
+
+
+                        if checkFilesOnly:
+
+                            if not os.path.exists(fullpath):
+                                PDcount = -1   
+                                additional_error = 'Make sure the File exists and it is accessible'
+                            else:
+                                PDcount += 1  #if no error is encountered will increment PDcount by 1
+
+                        else:
+                            
+                            if 1==1: # to set the contents to the current fly
+                                
+                                if new_monitor:
+                                    DAMf = c2d (fullpath)
+                                    
+                                    
+                                    rawData = np.zeros((1440,32))
+                                    c = 0; cf = 0
+                                    startChannel = self.DAM[k].getChannelName(0, f)
+
+                                    for line in DAMf.split('\n')[:-1]:
+                                        try:
+                                            rawData[c] = [ int(float(i)) for i in line.split('\t')[10:] ]
+                                            c += 1
+                                        except:
+                                            print 'Error with file %s at row number %s. Wrong data type? [ %s ]' % (filename, c, line)
+
+                                self.DAM[k].setFly(d,f, rawData[:,cf+startChannel-1])
+                                cf += 1
+                                PDcount += 1
+                            else:
+                                if PDcount > 0 and len(rawData[cf]) != 1440: additional_error = 'Not enough bins in the file.\n Only %s bins were found.' % len(content)
+                                PDcount = -1
+
+        if PDcount < 0:
+            dlg = wx.MessageDialog(self, 'Error with file!\n%s\n%s' % (fullpath, additional_error), 'Error', wx.OK | wx.ICON_INFORMATION)
+            if dlg.ShowModal() == wx.ID_YES: dlg.Destroy()
+        elif PDcount > 0 and not checkFilesOnly:
+            self.ProgressBarDlg(-1,'Saving Data to File...')
+            self.SaveDADData()
+        elif PDcount > 0 and checkFilesOnly:
+            dlg = wx.MessageDialog(self, 'All files required for the analysis were found.\nYou may now proceed with fetching the raw data.' , 'All ok.', wx.OK | wx.ICON_INFORMATION)
+            if dlg.ShowModal() == wx.ID_YES: dlg.Destroy()
+
+
+        self.ProgressBarDlg(-2,'End.')
+
+
+
+
+    def LoadRawDataMonitor(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
+        """
+        Takes the data from the folder where the raw data are placed
+        Uses the one file one monitor syntax
+        """
+
+        year = month = day = monitor = channel = ''
+        PDcount = 0
+        additional_error = ''
+        prev_filename = ''
+        extension = userConfig['DAMextension']
 
         #calculate how many flies we have to analize in total
         totnum = 0
@@ -1397,13 +1493,13 @@ class pySolo_DBFrame(wx.Frame):
 
                                     content = DAMf.readlines()
                                     for line in content:
-                                        while '\n' in line: line = line.replace('\n', '')
+                                        while '\n' in line: line = line.replace('\n', '') #remove newline characters
                                         while '\r' in line: line = line.replace('\r', '')
                                         try:
                                             rawData[c] = [ int(float(i)) for i in line.split('\t')[10:] ]
                                             c += 1
                                         except:
-                                            print 'Error with file %s at row number %s. Wrong data type?' % (filename, c)
+                                            print 'Error with file %s at row number %s. Wrong data type? [ %s ]' % (filename, c, line)
 
                                     DAMf.close()
 
