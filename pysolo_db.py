@@ -2,7 +2,7 @@
 
 import os
 from pysolo_path import panelPath, imgPath
-from convert import c2d
+from convert import c2d, c2b
 os.sys.path.append(panelPath)
 
 from default_panels import CustTableGrid, gridlib, SavePreferenceFile, FileDrop
@@ -915,18 +915,16 @@ class pySolo_DBFrame(wx.Frame):
                                     
             datatype = userConfig['DAMtype'] #Channel, Monitor, pvg_distance, pvg_beam
 
-            if datatype == 'Monitor' or datatype == 'pvg_beam':
+            if datatype == 'Monitor':
                 self.LoadRawDataMonitor(inputPath, checkOnlyFiles)
             elif datatype == 'pvg_distance':
-                self.LoadRawDataVideoDistance(inputPath, checkOnlyFiles)
+                self.LoadRawDataVideo(inputPath, checkOnlyFiles, mode='distance')
             elif datatype == 'pvg_beam':
-                self.LoadRawDataVideoBeam(inputPath, checkOnlyFiles)
-                
+                self.LoadRawDataVideo(inputPath, checkOnlyFiles, mode='beam')
             elif datatype == 'Channel' and GUI['datatype'] == 'Regular':
                 self.LoadRawDataChannel(inputPath, checkOnlyFiles)
             elif datatype == 'Channel' and GUI['datatype'] == 'Video':
                 print ("NOT SUPPORTED")
-
 
         else:
 
@@ -1330,7 +1328,7 @@ class pySolo_DBFrame(wx.Frame):
         elif count > 0:
             (keepGoing, skip) = self.dlgPD.Update(count, msg)
 
-    def LoadRawDataVideoDistance(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
+    def LoadRawDataVideo(self, inputPath, checkFilesOnly = False, timedData=True, mode='distance'): #USER DEFINED
         """
         Takes the data from the folder where the raw data are placed
         Uses the one file one monitor syntax
@@ -1362,7 +1360,6 @@ class pySolo_DBFrame(wx.Frame):
                     year = '%s' % self.DAM[k].getDatesRange()[2][d]
                     filepath = '%s/%s/%s%s/' % (year, month, month, day)
                     
-                    
 
                     for f in range (self.DAM[k].totFlies):
                         if PDcount < 0: break
@@ -1372,7 +1369,6 @@ class pySolo_DBFrame(wx.Frame):
                         fullpath = os.path.join(inputPath, filepath, filename)
 
                         new_monitor = (filename != prev_filename); prev_filename = filename
-
 
                         if checkFilesOnly:
 
@@ -1387,8 +1383,9 @@ class pySolo_DBFrame(wx.Frame):
                             if 1==1: # to set the contents to the current fly
                                 
                                 if new_monitor:
-                                    DAMf = c2d (fullpath)
                                     
+                                    if mode == 'distance': DAMf = c2d (fullpath)
+                                    elif mode == 'beam': DAMf = c2b (fullpath)
                                     
                                     rawData = np.zeros((1440,32))
                                     c = 0; cf = 0
@@ -1420,8 +1417,6 @@ class pySolo_DBFrame(wx.Frame):
 
 
         self.ProgressBarDlg(-2,'End.')
-
-
 
 
     def LoadRawDataMonitor(self, inputPath, checkFilesOnly = False, timedData=True): #USER DEFINED
@@ -1522,86 +1517,6 @@ class pySolo_DBFrame(wx.Frame):
 
 
         self.ProgressBarDlg(-2,'End.')
-
-
-    def LoadRawDataTank(self, checkFilesOnly = False): #USER DEFINED
-        """
-        Takes the data from the folder where the raw data are placed
-        Uses the one file one channel syntax
-        """
-
-        year = month = day = monitor = channel = ''
-        PDcount = 0
-        extension = userConfig['DAMextension']
-
-        #calculate total number of flies to be collected - used for the status bar
-        totnum = 0
-        for row in self.DAM:
-            totnum += (row.totDays * row.totFlies)
-
-        for k in range(0,len(self.DAM)):
-                if PDcount < 0: break
-                for d in range(0,self.DAM[k].totDays):
-                    if PDcount < 0: break
-                    progress =  (float(PDcount) / totnum ) * 100
-                    self.ProgressBarDlg(progress, 'Loading Raw Data.\n %s files of %s processed.' % (PDcount, totnum))
-                    day = str(self.DAM[k].rangeDays[0][d]).zfill(2)
-                    month = str(self.DAM[k].rangeDays[1][d]).zfill(2)
-                    year = str(self.DAM[k].rangeDays[2][d])
-                    filepath = '%s/%s/%s%s/' % (year, month, month, day)
-
-                    #read and set the data in the light file
-                    lightFilePath = os.path.join(self.DAMpath, filepath, '%s%sDayLight%s' % (month, day, extension))
-                    DAMf = open (lightFilePath, 'r')
-                    lightContent = DAMf.readlines()[4:] #remove 4 lines of headers, should be USERDEFINED
-                    DAMf.close()
-                    lights = [int(line.split(' ')[-1][:-2]) for line in lightContent] #take only the 6 digits light info
-                    self.DAM[k].setLights(d, lights)
-
-
-                    for f in range (0,self.DAM[k].totFlies):
-                        if PDcount < 0: break
-                        a = self.DAM[k].rangeChannel[1][f]
-                        monitor = str(self.DAM[k].rangeChannel[1][f]).zfill(3)
-                        channel = str(self.DAM[k].rangeChannel[0][f]).zfill(2)
-
-                        filename = '%s%sM%sC%s%s' % (month, day, monitor, channel, extension)
-                        fullpath = os.path.join(self.DAMpath,filepath,filename)
-
-                        if checkFilesOnly:
-
-                            if not os.path.exists(fullpath):
-                                PDcount = -1
-                            else:
-                                PDcount += 1
-
-                        else:
-
-                            DAMf = open (fullpath, 'r')
-                            content = DAMf.readlines()[4:] #remove 4 lines of headers, should be USERDEFINED
-
-                            DAMf.close()
-                            response = [int(line[:-4].zfill(3)) or 1000 for line in content] #take everything but the last three digits #if response is 000, put 1000
-                            content = [int(line[-4:-1]) for line in content] #take last two digits and remove newline character
-                            self.DAM[k].setResponse(d, f, response[:1440])
-
-
-                            self.DAM[k].setFly(d,f, content[:1440]) #1440 should be USERDEFINED
-                            PDcount += 1
-
-        if PDcount < 0:
-            dlg = wx.MessageDialog(self, 'File not found!\nMake sure the follwing file is existing and accessible\n%s' % fullpath, 'Error', wx.OK | wx.ICON_INFORMATION)
-            if dlg.ShowModal() == wx.ID_YES: dlg.Destroy()
-        elif PDcount > 0 and not checkFilesOnly:
-            self.ProgressBarDlg(-1,'Saving Data to File...')
-            self.SaveDADData()
-        elif PDcount > 0 and checkFilesOnly:
-            dlg = wx.MessageDialog(self, 'All files required for the analysis were found.\nYou may now proceed with fetching the raw data.' , 'All ok.', wx.OK | wx.ICON_INFORMATION)
-            if dlg.ShowModal() == wx.ID_YES: dlg.Destroy()
-
-
-        self.ProgressBarDlg(-2,'End.')
-
 
 
 
