@@ -18,7 +18,8 @@ class DAMlist(CustTableGrid):
         """
         used for autocompletion
         """
-        if event.GetKeyCode() == 9: #if we press the TAB KEY
+        TAB_KEY = 9
+        if event.GetKeyCode() == TAB_KEY:
             row = self.GetGridCursorRow()
             col = self.GetGridCursorCol()
             value = self.autoComplete(row, col)

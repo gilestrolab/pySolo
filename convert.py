@@ -44,8 +44,8 @@ def CoordsFromFile(filename):
         for line in rawfile:
             if line:
                 data = [xy.split(',') if ',' in xy else empty_coord for xy in line.split(TAB)[HEADER_LENGTH:] ]
-                if len(data) == 32: # If the computer crashes during data collection sometimes a line is not saved properly
-                    coords.append( data )
+                # If the computer crashes during data collection sometimes a line is not saved properly
+                if len(data) == 32: coords.append( data )     
                     
         
         a = np.array(coords, dtype=float)
