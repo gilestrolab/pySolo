@@ -184,14 +184,15 @@ class DAMlist(CustTableGrid):
         
         self.SetData(dl)
 
-    def AddRow(self, tag_name):
+    def AddRow(self, content=None, tag_name=''):
         """
         Add a new empty row. Will have the specified tag_name
         """
         #Create the new row and add it to the table
         new_id = '%s' % ( len(self.table.data)+1 )
-        new_row = [new_id, False] + [''] * 11 + [tag_name] + [False]
-        self.table.AddRow([new_row])
+        if content == None:
+            content = [new_id, False] + [''] * 11 + [tag_name] + [False]
+        self.table.AddRow([content])
 
     def ChangeRow(self, row, content):
         """
@@ -992,14 +993,14 @@ class pySolo_DBFrame(wx.Frame):
         dlg.Destroy()
 
         ##TODO: check the importing from csv##
-        for row in csv.split('\n')[:-1]:
+        for row in csv.split('\n')[:]:
             row_split = row.split(',')
             for i in range(len(row_split)):
                 try:
                     row_split[i]=int(row_split[i])
                 except:
                     pass
-            self.DAMlist.append(row_split)
+            self.DAMlist.AddRow(row_split)
 
         self.updateListing()
         self.PopulateBrowser()
