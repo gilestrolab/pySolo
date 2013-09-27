@@ -16,6 +16,7 @@
 import os, datetime, smtplib, optparse, glob, re
 from zipfile import ZipFile, ZIP_DEFLATED
 import ConfigParser
+from calendar import month_abbr
 
 from time import mktime
 from email.MIMEMultipart import MIMEMultipart
@@ -25,8 +26,7 @@ from email.Utils import COMMASPACE, formatdate
 from email import Encoders
 
 #Here we define some variables that are used all over the place
-MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug','Sep', 'Oct', 'Nov', 'Dec']
-__version__ = 0.92
+__version__ = 0.93
 
 
 class cp_config():
@@ -296,7 +296,7 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
                 print line
             
             lineDate = datetime.datetime(    (int(d[2]) < 2000)*2000 + int(d[2]),               #year
-                                              MONTHS.index(d[1])+1,     #month as number
+                                              month_abbr.index(d[1]),     #month as number
                                               int(d[0]),                 #day
                                               int(t[0]),                  #hour
                                               int(t[1]),                 #minute
@@ -357,7 +357,7 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
 
         ch_matrix = zip(*ch_matrix_r)
 
-        t_date = '%s %s %s' % (dd, MONTHS[int(mm)-1], startTime.year)
+        t_date = '%s %s %s' % (dd, month_abbr[int(mm)], startTime.year)
 
         for channel in ch_matrix:
 
