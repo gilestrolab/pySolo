@@ -147,7 +147,7 @@ def subplot_distribution(fig, title, value_dist, value_std, pos=1, col=None):
 
         a2 = fig.add_subplot(312)
         w = 1
-        n, bins, patches = a2.hist(value_dist, n_bin , rwidth=w, fc = col, alpha=0.5)
+        n, bins, patches = a2.hist(value_dist.compressed(), n_bin , rwidth=w, fc = col, alpha=0.5)
         a2.set_ylabel('n. of flies')
         a2.set_xlim((0, 1440))
         a2.set_ylim(min(n)*1.1, max(n)*1.1)
