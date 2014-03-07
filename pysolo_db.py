@@ -66,8 +66,12 @@ class DAMlist(CustTableGrid):
         """
         for row in range( self.rowNumber() ):
             if self.table.data[row][1] and not self.table.data[row][14]: #if cheched and visible
-                all_tags = set(self.table.data[row][13].split(';'))
-                all_tags.discard('')
+                current_tags = self.table.data[row][13]
+                if current_tags:
+                        all_tags = set(current_tags.split(';'))
+                        all_tags.discard('')
+                else:
+                        all_tags = set()
                 all_tags.add(tag_name)
                 self.table.data[row][13] = list2str(all_tags, separator=';')
 
@@ -915,19 +919,26 @@ class pySolo_DBFrame(wx.Frame):
                     self.DAM.append (DAMslice(row[2], row[3], row[5], row[6], row[7], row[8], row[9], row[10], row[11], row[12]))
                                     #DAMslice(mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version=pySoloVersion)
                                     
-            datatype = userConfig['DAMtype'] #Channel, Monitor, pvg_distance, pvg_beam
+            #Input format
+            datatype = userConfig['DAMtype'] #Channel, Monitor, pvg_distance, pvg_beam, pvg_raw
 
+            #TriKinetics Input Data
             if datatype == 'Monitor':
                 self.LoadRawDataMonitor(inputPath, checkOnlyFiles)
-            elif datatype == 'pvg_distance':
-                self.LoadRawDataVideo(inputPath, checkOnlyFiles, mode='distance')
-            elif datatype == 'pvg_beam':
-                self.LoadRawDataVideo(inputPath, checkOnlyFiles, mode='beam')
             elif datatype == 'Channel' and GUI['datatype'] == 'Regular':
                 self.LoadRawDataChannel(inputPath, checkOnlyFiles)
             elif datatype == 'Channel' and GUI['datatype'] == 'Video':
                 print ("NOT SUPPORTED")
 
+            #pySolo Video Input Data
+            elif datatype == 'pvg_distance' or datatype == 'pvg_beam':
+                self.LoadRawDataMonitor(inputPath, checkOnlyFiles)
+                
+             #pySolo Video Input Data RAW
+            elif datatype == 'pvg_raw' and userConfig['virtual_trikinetics']:
+                self.LoadRawDataVideo(inputPath, checkOnlyFiles, mode='beam')
+            elif datatype == 'pvg_raw' and not userConfig['virtual_trikinetics']:
+                self.LoadRawDataVideo(inputPath, checkOnlyFiles, mode='distance')                
         else:
 
             dlg = wx.MessageDialog(self, 'Please, check your entries.\nSome values are missing or no rows are checked.', 'Error', wx.OK | wx.ICON_INFORMATION)
