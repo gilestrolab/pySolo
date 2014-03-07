@@ -517,7 +517,7 @@ class pySolo_DBFrame(wx.Frame):
 
         #add the listbox on the left side of the panel
         self.BrowsingData.append(wx.ListBox(panel,wx.ID_ANY))
-        self.BrowsingData[-1].InsertItems([],0)
+        self.BrowsingData[-1].InsertItems([''],0)
         self.BrowsingData[-1].Bind(wx.EVT_LISTBOX, self.OnChangeDAMentrySelection)
 
         #put everything in a sizer and return this panel
@@ -712,9 +712,9 @@ class pySolo_DBFrame(wx.Frame):
 
         #Get the Tagname that the new row will inherit
         tag_name = self.GetTagName()
-        if tag_name == 'All': tag_name = ''
+        if tag_name == 'All': tag_name = None
 
-        self.DAMlist.AddRow(tag_name)
+        self.DAMlist.AddRow(content = None, tag_name=tag_name)
 
 
         self.resetTablesSize()
@@ -1281,8 +1281,6 @@ class pySolo_DBFrame(wx.Frame):
         SavePreferenceFile(userConfig, customUserConfig)
 
 
-
-
     def updateTagList(self, selection=0):
         """
         Reads all tags present in the current DAMlist
@@ -1294,7 +1292,7 @@ class pySolo_DBFrame(wx.Frame):
             all_tags = []
             dl = self.DAMlist.GetData()
             all_num = 'All (%s)' % len(dl)
-            for tag in zip(*dl)[13]:
+            for tag in (zip(*dl)[13]):
                 all_tags = all_tags + str(tag).split(';')
     
             set_tags = list(set(all_tags))
