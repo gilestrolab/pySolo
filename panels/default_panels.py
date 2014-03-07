@@ -1393,7 +1393,7 @@ class PlotGrid(pySoloPanel):
         else:
             self.canvas = MyWXCanvas(self.virtualw, size)
         
-        self.virtualw.SetBackgroundColour(wx.NamedColor("WHITE"))
+        self.virtualw.SetBackgroundColour(wx.NamedColour("white"))
        
         self.virtualw.SetVirtualSize(size)
         #self.virtualw.SetScrollbars(20, 20, size[0]/20, size[1]/20)
