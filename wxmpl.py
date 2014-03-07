@@ -1124,7 +1124,9 @@ class PlotPanel(FigureCanvasWxAgg):
         # find the toplevel parent window and register an activation event
         # handler that is keyed to the id of this PlotPanel
         topwin = toplevel_parent_of_window(self)
-        topwin.Connect(-1, self.GetId(), wx.wxEVT_ACTIVATE, self.OnActivate)
+        #See: http://matplotlib.1069221.n5.nabble.com/wxMPL-patch-td34955.html
+        #topwin.Connect(-1, self.GetId(), wx.wxEVT_ACTIVATE, self.OnActivate)
+        topwin.Connect(self.GetId(), wx.ID_ANY, wx.wxEVT_ACTIVATE, self.OnActivate)
 
         wx.EVT_ERASE_BACKGROUND(self, self.OnEraseBackground)
         wx.EVT_WINDOW_DESTROY(self, self.OnDestroy)
