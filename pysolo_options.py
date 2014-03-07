@@ -270,12 +270,12 @@ class OptionsFilesFolderPanel(wx.ScrolledWindow):
             self.DAM_version_radio.append( wx.RadioButton( self, -1, 'pySolo Video - Raw Data', name = 'pvg_raw' ) )
             
             #not active yet
-            self.DAM_version_radio[-1].Enable(False)
+            #self.DAM_version_radio[-1].Enable(False)
 
             for radio in self.DAM_version_radio:
                 grid1.Add( radio, 0, wx.ALIGN_LEFT|wx.LEFT|wx.RIGHT|wx.TOP, 5 )
                 radio.Bind(wx.EVT_RADIOBUTTON, partial(self.OnGroupSelect, 'DAMtype', bool=False ))
-            ck = ['Channel', 'Monitor', 'pvg_distance', 'pvg_beam'].index(self.temp_userconfig['DAMtype'])
+            ck = ['Channel', 'Monitor', 'pvg_distance', 'pvg_beam', 'pvg_raw'].index(self.temp_userconfig['DAMtype'])
             self.DAM_version_radio[ck].SetValue(True)
 
             items.append (grid1)
