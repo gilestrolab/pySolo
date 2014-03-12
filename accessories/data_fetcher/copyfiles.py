@@ -481,7 +481,7 @@ if __name__ == "__main__":
             for n, monFile in enumerate(dam_filelist):
                 fname = os.path.split(monFile)[-1]
 
-                log.output ( 'Processing file %s/%s: %s' % (n+1, len(dam_filelist), fname) )
+                log.output ( 'Found file %s/%s: %s' % (n+1, len(dam_filelist), fname) )
                     
                 try:
                     mon = int(fname[fname.index(FILE_PREFIX)+len(FILE_PREFIX):-4])
@@ -490,6 +490,10 @@ if __name__ == "__main__":
                 
                 if monitors.count(mon):
                     processFile( monFile, os.path.join(outputPath, fname), startTime, correctErrors=opts.GetOption('correctErrors'), cleanInput=opts.GetOption('cleanInput') )
+                    log.output ( 'Processing file: %s' % (fname) )
+                else:
+                    log.output ( 'Skipping file: %s' % (fname) )
+                    
         else:
             log.error ( 'The output folder already exists! Process Aborted.' )
 
