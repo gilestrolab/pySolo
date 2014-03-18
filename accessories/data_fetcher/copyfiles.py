@@ -296,7 +296,7 @@ def processFile(inFile, outFile, startTime, dataType=0, correctErrors=True, clea
                 print line
             
             lineDate = datetime.datetime(    (int(d[2]) < 2000)*2000 + int(d[2]),               #year
-                                              month_abbr.index(d[1]),     #month as number
+                                              [m for m in month_abbr].index(d[1]),     #month as number
                                               int(d[0]),                 #day
                                               int(t[0]),                  #hour
                                               int(t[1]),                 #minute
@@ -481,7 +481,7 @@ if __name__ == "__main__":
             for n, monFile in enumerate(dam_filelist):
                 fname = os.path.split(monFile)[-1]
 
-                log.output ( 'Found file %s/%s: %s' % (n+1, len(dam_filelist), fname) )
+                #log.output ( 'Found file %s/%s: %s' % (n+1, len(dam_filelist), fname) )
                     
                 try:
                     mon = int(fname[fname.index(FILE_PREFIX)+len(FILE_PREFIX):-4])
@@ -489,8 +489,8 @@ if __name__ == "__main__":
                     log.error( 'Could not determine monitor number. Check that your files are properly named (e.g.: Monitor001.txt)' )
                 
                 if monitors.count(mon):
-                    processFile( monFile, os.path.join(outputPath, fname), startTime, correctErrors=opts.GetOption('correctErrors'), cleanInput=opts.GetOption('cleanInput') )
                     log.output ( 'Processing file: %s' % (fname) )
+                    processFile( monFile, os.path.join(outputPath, fname), startTime, correctErrors=opts.GetOption('correctErrors'), cleanInput=opts.GetOption('cleanInput') )
                 else:
                     log.output ( 'Skipping file: %s' % (fname) )
                     
