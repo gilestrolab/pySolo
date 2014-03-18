@@ -50,9 +50,9 @@ class DAMslice(object):
 
         #Data coming from outside
         self.Header = [mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version]
-        self.Mon = str(mon).split('/')
-        self.StartChannel = str(sch).split('/')
-        self.EndChannel = str(ech).split('/')
+        self.Mon = [str(int(m)) for m in mon.split('/')]
+        self.StartChannel = [str(int(sc)) for sc in sch.split('/')]
+        self.EndChannel = [str(int(ec)) for ec in ech.split('/')]
         self.Genotype = str(genotype)
         self.Comment = str(comment)
         self.StartMonth = int(smont)
