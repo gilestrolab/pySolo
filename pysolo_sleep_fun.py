@@ -145,6 +145,17 @@ def number_sleep_episodes(s5, t0 = None, t1 = None):
 
     return w2s.sum(axis = 2)
 
+def sleep_latency(s5, lightsoff=720):
+    """
+    returns sleep latency in minutes, that is time between lights off and first recorded sleep episode of at least 5 minutes
+    """
+    grid = np.indices(s5.shape)[2] # compile a grid containing the indices of the array
+    k = grid * s5 # keep only the indices where s5 is 1
+    
+    sl = np.argmax(k > lightsoff, axis=2) - lightsoff
+    return np.ma.masked_less(sl, 0)
+    
+
 def all_sleep_episodes(s5, t0 = None, t1 = None):
     '''
     Returns the length of all sleep episodes in the given interval (t0,t1)

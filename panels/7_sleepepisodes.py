@@ -16,8 +16,8 @@ class Panel(PlotGrid):
         PanelProportion = [6,2,1]    #0 = not_show
         CanvasInitialSize = (10,6)     #size in inches
 
-        colLabels = ['Genotype', 'Day', 'Mon', 'Ch', 'N' ,'alive', 'totSleep', 'SD', 'rDS', 'SD', 'rNS', 'SD', 'AI', 'SD', 'rD aLSE', 'SD', 'rD aNSE', 'SD','rN aLSE', 'SD', 'rN aNSE', 'SD','aLoSE', 'color']
-        dataTypes = [gridlib.GRID_VALUE_STRING] * 4 + [gridlib.GRID_VALUE_NUMBER] *2 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 17 + [gridlib.GRID_VALUE_STRING]
+        colLabels = ['Genotype', 'Day', 'Mon', 'Ch', 'N' ,'alive', 'totSleep', 'SD', 'rDS', 'SD', 'rNS', 'SD', 'AI', 'SD', 'rD aLSE', 'SD', 'rD aNSE', 'SD','rN aLSE', 'SD', 'rN aNSE', 'SD','aLoSE', 'latency', 'SD', 'color']
+        dataTypes = [gridlib.GRID_VALUE_STRING] * 4 + [gridlib.GRID_VALUE_NUMBER] *2 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 19 + [gridlib.GRID_VALUE_STRING]
 
         PlotGrid.__init__(self, parent,
                                          PanelProportion,
@@ -82,6 +82,7 @@ class Panel(PlotGrid):
         len_sleep_episodes_night = all_sleep_episodes (s5, 721, 1440)
         num_sleep_episodes_day = number_sleep_episodes (s5, 0, 720)
         num_sleep_episodes_night = number_sleep_episodes (s5, 721, 1440)
+        latency = sleep_latency(s5, 720)
 
         longest_sleep_episode = max( len_sleep_episodes_night )
         frag_factor = 1
@@ -104,7 +105,9 @@ class Panel(PlotGrid):
                    std( len_sleep_episodes_night ),
                    average( num_sleep_episodes_night ),
                    std( average( num_sleep_episodes_night, axis=0 ) ),
-                   average( longest_sleep_episode )]
+                   average( longest_sleep_episode ),
+                   average(latency),
+                   std(latency)]
 
         pos = GUI['currentlyDrawn']
 
@@ -118,20 +121,21 @@ class Panel(PlotGrid):
             self.sheet.SetData([datarow])
 
         title = 'title'
-        self.canvas.redraw(plot_episodes, title, len_sleep_episodes_day, len_sleep_episodes_night, num_sleep_episodes_day, num_sleep_episodes_night, longest_sleep_episode, frag_factor, pos, color )
+        self.canvas.redraw(plot_episodes, title, len_sleep_episodes_day, len_sleep_episodes_night, num_sleep_episodes_day, num_sleep_episodes_night, longest_sleep_episode, frag_factor, latency, pos, color )
 
 
 
 
-def plot_episodes(fig, title, lse_day, lse_night, nse_day, nse_night, longest_episode, ff_dist, pos, col):
+def plot_episodes(fig, title, lse_day, lse_night, nse_day, nse_night, longest_episode, ff_dist, latency, pos, col):
 
     lse_avg_day = average(lse_day)
     lse_avg_night = average(lse_night)
     long_avg_night = average(longest_episode)
     ff = average(ff_dist)
-
-    #Lower Left
-    a1 = fig.add_subplot(223, title = 'Avg Length of Sleep Episode (day)')
+    
+    # . . .
+    # x . .
+    a1 = fig.add_subplot(234, title = 'Length of SE (day)')
     pos = pos + 1
     width = float(pos) / (pos*2)
     if GUI['ErrorBar']:
@@ -144,8 +148,10 @@ def plot_episodes(fig, title, lse_day, lse_night, nse_day, nse_night, longest_ep
     a1.set_xlim(1.5, pos+0.5)
     a1.set_ylabel('Sleep (m)')
 
-    #Lower Right
-    a2 = fig.add_subplot(224, sharey=a1, title = 'Avg Length of Sleep Episode (night)')
+    # . . .
+    # . x .
+
+    a2 = fig.add_subplot(235, sharey=a1, title = 'Length of SE (night)')
     width = float(pos) / (pos*2)
 
     if GUI['ErrorBar']:
@@ -158,9 +164,10 @@ def plot_episodes(fig, title, lse_day, lse_night, nse_day, nse_night, longest_ep
     a2.set_xlim(1.5, pos+0.5)
     a2.set_ylim(0,720)
 
+    # . x .
+    # . . .
 
-    #Upper Right
-    a3 = fig.add_subplot(222, title = 'Number of Sleep Episodes (night/day)')
+    a3 = fig.add_subplot(232, title = 'Number of SE (n/d)')
     width = float(pos) / (pos*2)
     col_brighter = brighten(col)
 
@@ -180,10 +187,9 @@ def plot_episodes(fig, title, lse_day, lse_night, nse_day, nse_night, longest_ep
     a3.set_xlim(1.5, pos+0.5)
     #a3.set_ylim(0,720)
 
-
-
-    #Upper Left
-    a4 = fig.add_subplot(221, title = 'Avg Longest Sleep Episode')
+    # x . .
+    # . . .
+    a4 = fig.add_subplot(231, title = 'Longest SE')
     width = float(pos) / (pos*2)
 
     if GUI['ErrorBar']:
@@ -195,6 +201,22 @@ def plot_episodes(fig, title, lse_day, lse_night, nse_day, nse_night, longest_ep
     a4.set_xticklabels(range(0,pos))
     a4.set_xlim(1.5, pos+0.5)
     #if lse_avg_night > 3: a4.set_ylim(0,120)
+
+    # . . x
+    # . . .
+    a5 = fig.add_subplot(233, title = 'Latency')
+    width = float(pos) / (pos*2)
+
+    if GUI['ErrorBar']:
+        a5.bar(pos, average(latency), width, color=col, yerr=std(latency), ecolor=col, align='center' )
+    else:
+        a5.bar(pos, average(latency), width, color=col , align='center')
+
+    a5.set_xticks(range(1,pos+2))
+    a5.set_xticklabels(range(0,pos))
+    a5.set_xlim(1.5, pos+0.5)
+
+
 
 ##    a5 = fig.add_subplot(222)
 ##    width = float(pos) / (pos*2)
