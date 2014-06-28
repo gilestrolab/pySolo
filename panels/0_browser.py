@@ -100,7 +100,7 @@ class Panel(PlotGrid): #Class name must be Panel
                 s5 = concatenate ((s5, s5_t))
                 ax = concatenate ((ax, ax_t))
                 s30 = concatenate ((s30, s30_t))
-
+        
         ## HERE WE ARE OUT OF THE SELECTION LOOP
         # we calculate date by fly
         num_flies = s5.shape[1]
@@ -156,12 +156,12 @@ class Panel(PlotGrid): #Class name must be Panel
         # We Draw what we need to
         self.canvas.redraw(self.subplot_dailydata, title, str(genotype_set),
                            fly_activity, fly_activity_std, dist_fly30, stde_fly30,
-                           ShowErrorBar, col=color)
+                           ShowErrorBar, num_flies, col=color)
 
         self.WriteComment(cSEL.Comment or '')
 
 
-    def subplot_dailydata(self, fig, title, lbl, activity, activity_std, sleep, sleep_std, errBars, col=None):
+    def subplot_dailydata(self, fig, title, lbl, activity, activity_std, sleep, sleep_std, errBars, num_flies, col=None):
 
         #This in case the data we are passing are actually empty (flies are inactive or dead).
         #Here we determine the length of a day to be able to fill things
@@ -176,7 +176,6 @@ class Panel(PlotGrid): #Class name must be Panel
         activity_bin = int( self.GetOption('activity_bin') ) # 1,5,10,15,30,60 minutes
         activity_limit = self.GetOption('Yactivity')
         show_hypno_group = self.GetOption('show_hypno_group')
-
         
         try:
             DayLength = len(sleep)
@@ -217,13 +216,13 @@ class Panel(PlotGrid): #Class name must be Panel
             a4.set_xticklabels(range(0,25,3))
 
         #Draw the hypnogram at the bottom of the figure and the axis labels
-        if show_hypno_group:
+        if show_hypno_group or num_flies == 1:
 
             ipno = np.zeros(DayLength)
             indices = np.where(activity < 1)
             ipno[indices] = 1
             ipno = ipno,
-
+            
             if sync: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[], sharex=a4)
             else: a3 = fig.add_axes([lm, 0.12, rm, 0.1], yticks=[])
                 
