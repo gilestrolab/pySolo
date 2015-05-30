@@ -31,6 +31,8 @@ class Panel(PlotGrid):
         self.name = 'Sleep Trend'
         self.compatible = 'all'
         
+        self.AddOption('show_legend', 'boolean', 1, ['Show legend', 'Do not show legend'], 'Do you want to draw a legend in the Day / Night graph?')
+
 
     def Refresh(self):
         '''
@@ -137,15 +139,26 @@ class Panel(PlotGrid):
         single_day_std = average(value_std) 
         single_day_rd_avg = average(day_sleep)
         single_day_rn_avg = average(night_sleep)
+        
+        plot_legend = self.GetOption('show_legend')
 
-        self.canvas.redraw(subplot_trend, title, value_avg, value_std, single_day_avg, single_day_std, single_day_rd_avg, single_day_rn_avg, pos, color )
+        self.canvas.redraw(subplot_trend, title, value_avg, value_std, single_day_avg, single_day_std, single_day_rd_avg, single_day_rn_avg, pos, color, plot_legend )
         self.WriteComment(cSEL.Comment or '')
 
 
-def subplot_trend(fig, title, value_avg, value_std, single_day_avg, single_day_std, single_day_rd_avg, single_day_rn_avg, pos, col):
+def subplot_trend(fig, title, value_avg, value_std, single_day_avg, single_day_std, single_day_rd_avg, single_day_rn_avg, pos, col, plot_legend):
 
 ##    for n, point in zip(range(len(value_avg)), value_avg):
 ##        if point == NaN: value_avg[n] = -1
+
+    if GUI['choice'] == 'AI':
+        ylabel = 'Activity Index'
+        a2title = 'Activity'
+        
+    else:
+        ylabel = 'Minutes'
+        a2title = 'Sleep'
+
 
 
     #UPPER PANEL
@@ -154,7 +167,8 @@ def subplot_trend(fig, title, value_avg, value_std, single_day_avg, single_day_s
     a1.plot(value_avg, color=col, marker= 'o', ls = ':')
     if GUI['ErrorBar']: a1.errorbar(range(0,len(value_avg)), value_avg, value_std, ecolor=col, fmt=None )
     if single_day_avg > 3: a1.set_ylim(0,1440)
-    a1.set_ylabel('Sleep (m/d)')
+    
+    a1.set_ylabel(ylabel)
 
     a1.set_xlim(-1,len(value_avg))
     step = (len(value_avg)>50 * 5) or 1
@@ -165,7 +179,7 @@ def subplot_trend(fig, title, value_avg, value_std, single_day_avg, single_day_s
     a1.set_title(title)
 
     #LOWER RIGHT
-    a2 = fig.add_subplot(224, title = 'Total Sleep')
+    a2 = fig.add_subplot(224, title = a2title)
     pos = pos + 1
     width = float(pos) / (pos*2)
 
@@ -174,7 +188,8 @@ def subplot_trend(fig, title, value_avg, value_std, single_day_avg, single_day_s
     else:
         a2.bar(pos, single_day_avg, width, color=col , align='center')
 
-    a2.set_ylabel('Sleep (m/d)')
+
+    a2.set_ylabel(ylabel)
     a2.set_xticks(range(1,pos+2))
     a2.set_xticklabels(['']+range(1,pos))
     a2.set_xlim(1.5,pos+0.5)
@@ -182,7 +197,7 @@ def subplot_trend(fig, title, value_avg, value_std, single_day_avg, single_day_s
 
 
     #LOWER LEFT
-    a3 = fig.add_subplot(223, title = 'Total Sleep (day/night)')
+    a3 = fig.add_subplot(223, title = 'Total Sleep (day - night)')
 
     col_brighter = brighten(col)
 
@@ -195,5 +210,8 @@ def subplot_trend(fig, title, value_avg, value_std, single_day_avg, single_day_s
     a3.set_xticklabels(['']+range(1,pos))
     a3.set_xlim(1.5,pos+0.5)
     a3.set_ylim(0,1440)
-##    a3.legend( (p1[0], p2[0]), ('Day', 'Night') )
-    ##a3.set_ylabel('Sleep (m/d)')
+    
+    if plot_legend:
+        a3.legend( (p1[0], p2[0]), ('Day', 'Night') )
+    
+    a3.set_ylabel('Minutes')

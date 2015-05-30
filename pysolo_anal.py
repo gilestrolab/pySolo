@@ -19,6 +19,15 @@
 #       along with this program; if not, write to the Free Software
 #       Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
 #       MA 02110-1301, USA.
+#
+#        self.sp = MultiSplitterWindow
+#           self.TreePanel
+#           self.Notebook
+#               self.Pages
+#           self.sbPanel
+#               self.OptSB
+#               self.ExportSB
+
 
 import wx, os, glob
 from pysolo_path import panelPath, imgPath
@@ -33,6 +42,10 @@ from wx.lib.splitter import MultiSplitterWindow
 import wx.lib.scrolledpanel as scrolled
 from wx.lib.buttons import GenBitmapToggleButton
 import wx.lib.agw.customtreectrl as CT
+
+import wx.lib.newevent
+myEVT_OPTION_CHANGED, EVT_OPTION_CHANGED = wx.lib.newevent.NewEvent()
+
 
 class ExportVariableSideBar(wx.Panel):
     """
@@ -249,6 +262,7 @@ class OptionSideBar(wx.Panel):
         create the actual panel
         """
         
+        self.parent = parent
         wx.Panel.__init__(self, parent, -1)
         
         self.varType = ''
@@ -307,6 +321,10 @@ class OptionSideBar(wx.Panel):
 
         self.OptionsInfo.SetValue(descMsg)
 
+        #create and post the event
+        #TOFIX: this event does not propagate upstream
+        #It's needed to refresh drawing when variables are changed
+        wx.PostEvent(self.parent, myEVT_OPTION_CHANGED())
 
     def SetItemsList(self, checked, choices):
         """
@@ -412,9 +430,6 @@ class NavigationTree(CT.CustomTreeCtrl):
         GUI['inputbox'] = ''
         GUI['currentlyDrawn'] = 0
         GUI['holdplot'] = False
-
-    
-
 
     def onKeyDown(self,event):
         """
@@ -684,20 +699,22 @@ class pySolo_AnalysisFrame(wx.Frame):
         self.MakeTheTree() #creates self.TreePanel and contents
 
         self.MakeTheNotebook() #creates self.nb
-        SB = self.MakeTheSideBar() #creates the sidebar on the right side
+        self.sidebar = self.MakeTheSideBar() #creates the sidebar on the right side
 
 
         self.sp.AppendWindow(self.TreePanel, self.initpos)
-        self.sp.AppendWindow(self.nb)
-        self.sp.AppendWindow(SB)
+        self.sp.AppendWindow(self.nb) # contains all the panels as pages
+        self.sp.AppendWindow(self.sidebar) # contains optsb and exportsb
         
         self.OptSB.Show(False)
 
         #self.sp.SplitVertically(self.TreePanel, self.nb, self.initpos)
         self.sp.SetMinimumPaneSize(self.minpane)
 
+        #custom events are defined in pysolo_lib
         self.Bind(EVT_FILE_MODIFIED, self.SetfileisModified)
         self.Bind(EVT_OPTIONSB_SHOW_HIDE, self.onShowOptionsSideBar)
+        self.Bind(EVT_OPTION_CHANGED, self.Refresh)
         self.Bind(wx.EVT_CLOSE, self.onClose)
         self.Bind(wx.EVT_SIZE, self.onResize)
 
@@ -792,7 +809,7 @@ class pySolo_AnalysisFrame(wx.Frame):
 
     def MakeTheSideBar(self):
         """
-        We create the panel that will sit on the right side to modify panel specific parameters
+        We create an option panel that will sit on the right side to modify panel specific parameters
         """
 
         sbPanel = MultiSplitterWindow(self.sp)
