@@ -1148,19 +1148,17 @@ class ExportVariable(object):
         self.name = variable_name
         self.description = description
     
-    def exportToFile(self, outputPath, fileType='binary'):
+    def exportToFile(self, outfile, fileType='binary'):
         '''
         export to variable as np export object
         if it is not a numpy array, it will be first converted to one
         '''
-        i = ['binary', 'text'].index(fileType)
-        separator = ['','\t'][i]
-        try:
-            var = array(self.variable)
-            var.tofile(outputPath, separator)
-            return True
-        except:
-            return False
+        if 'binary' in fileType:
+            np.save(outfile, self.variable)
+        else:
+            np.savetxt(outfile, self.variable, delimiter=',')   # X is an array
+
+        return True
 
 
 class pySoloPanel(wx.Panel):

@@ -166,9 +166,8 @@ class Panel(PlotGrid):
         if n_bin1: w2 = 1.0/n_bin1
         else: w2 = 0.3
         
-
-        if len(dist_sde_sel) != 0: n1, bins, patches = a1.hist(dist_sde_sel, n_bin1 , rwidth=w1, fc = col)#, alpha=0.5)
-        if len(dist_sde_rem) != 0: n2, bins, patches = a1.hist(dist_sde_rem, n_bin2 , rwidth=w2, fc = brighten(col))#, alpha=0.5)
+        if len(dist_sde_sel) > 1: n1, bins, patches = a1.hist(dist_sde_sel, n_bin1 , rwidth=w1, fc = col)#, alpha=0.5)
+        if len(dist_sde_rem) > 1: n2, bins, patches = a1.hist(dist_sde_rem, n_bin2 , rwidth=w2, fc = brighten(col))#, alpha=0.5)
     
         a1.set_ylabel('n. of flies')
         a1.set_xlim((0, 100))
@@ -179,9 +178,12 @@ class Panel(PlotGrid):
         a5 = fig.add_axes([0.70, 0.55, 0.20, 0.35])
         n_low_sde_thre = len(dist_sde_rem)
         n_hig_sde_thre = len(dist_sde_sel)
-        
-        a5.bar(1, n_low_sde_thre, color=brighten(col) , align='center')
-        a5.bar(2, n_hig_sde_thre, color=col , align='center')
+
+        #if plot_legend:
+        b1 = a5.bar(1, n_low_sde_thre, color=brighten(col) , align='center')
+        b2 = a5.bar(2, n_hig_sde_thre, color=col , align='center')
+        a5.legend( (b1[0], b2[0]), ('<SDE', '>SDE') )
+
         a5.set_xticks([])
         a5.set_xticklabels([])
 
