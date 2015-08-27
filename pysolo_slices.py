@@ -50,9 +50,9 @@ class DAMslice(object):
 
         #Data coming from outside
         self.Header = [mon, sch, ech, genotype, comment, smont, sd, emont, eday, year, version]
-        self.Mon = [str(int(m)) for m in mon.split('/')]
-        self.StartChannel = [str(int(sc)) for sc in sch.split('/')]
-        self.EndChannel = [str(int(ec)) for ec in ech.split('/')]
+        self.Mon = [str(int(m)) for m in str(mon).split('/')]
+        self.StartChannel = [str(int(sc)) for sc in str(sch).split('/')]
+        self.EndChannel = [str(int(ec)) for ec in str(ech).split('/')]
         self.Genotype = str(genotype)
         self.Comment = str(comment)
         self.StartMonth = int(smont)
@@ -86,8 +86,8 @@ class DAMslice(object):
         self.fly30min = np.zeros((self.totDays, self.totFlies, self.datalenght), dtype=self.datatype)
         self.flyStatus = np.ones((self.totDays, self.totFlies), dtype=self.datatype) # fly is enabled or not?
 
-
-    def __CalculateSleep__(self, fly_to_calc=None, inactivity=0):
+#TODO
+    def __CalculateSleep__(self, fly_to_calc=None, inactivity=0, use_legacy_algorithm=False):
         """
         This function will calculate sleep5mins and sleep30mins array
         for all the flies of the current DAM
@@ -122,9 +122,23 @@ class DAMslice(object):
 
         #t1 = single_flies.transpose
 
-        for fly in fc:
-            single_flies5min[fly] = [( single_flies[fly][i-b1:i+a1].sum() <= inactivity ) for i in range (d*c)]
-            single_flies30min[fly]  = [ single_flies5min[fly][i-b2:i+a2].sum() for i in range (d*c)]
+        if use_legacy_algorithm:
+
+            for fly in fc:
+                single_flies5min[fly] = [( single_flies[fly][i-b1:i+a1].sum() <= inactivity ) for i in range (d*c)]
+                single_flies30min[fly]  = [ single_flies5min[fly][i-b2:i+a2].sum() for i in range (d*c)]
+
+        else:
+
+            for fly in fc:
+                
+                sf_1 = np.array([( single_flies[fly][i:i+5].sum() <= inactivity ) for i in range (d*c)])
+                sf_2 = np.array([( single_flies[fly][i-5:i].sum() <= inactivity ) for i in range (d*c)])
+
+                single_flies5min[fly] = sf_1 + sf_2
+
+                single_flies30min[fly]  = [ single_flies5min[fly][i-b2:i+a2].sum() for i in range (d*c)]
+
 
         #single_flies5min = single_flies5min * 1./minute #this is necessary to have all values properly referring to minutes
         #single_flies30min = single_flies30min * 1./minute
