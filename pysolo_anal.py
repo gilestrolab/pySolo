@@ -173,6 +173,7 @@ class ExportVariableSideBar(wx.Panel):
         """
         Export Variables to file
         """
+
         format, extension = self.getOutputParams()
         fname = self.getFilename(self.varname, extension) + extension
         full_path = os.path.join(self.outputPath, fname)
@@ -183,7 +184,7 @@ class ExportVariableSideBar(wx.Panel):
             success = GUI['canExport'][self.varname].exportToFile(full_path, format)
 
         if not success:
-            wx.MessageBox('Error saving the file %s\nDisk may be full or you may not have write rights.' % full_path, 'Error!', style=wx.OK|wx.ICon_EXCLAMATIon)
+            wx.MessageBox('Error saving the file %s\nDisk may be full or you may not have write rights.' % full_path, 'Error!', style=wx.OK|wx.ICON_EXCLAMATION)
 
     def ExportDefaultVariable(self, fpath, var_name, export_format):
         """
@@ -274,8 +275,8 @@ class OptionSideBar(wx.Panel):
         self.OptionsTree.Bind(wx.EVT_TREE_SEL_CHANGED, self.onSelChanged)
 
         self.OptionsInput = wx.ComboBox ( self, -1, value='Select', pos=(-1,-1), size=(-1,-1), choices=[], style=wx.CB_DROPDOWN )
-        self.Bind(wx.EVT_COMBOBOX, self.onChangeInput)
-        self.Bind(wx.EVT_TEXT_ENTER, self.onChangeInput)
+        self.OptionsInput.Bind(wx.EVT_COMBOBOX, self.onChangeInput)
+        self.OptionsInput.Bind(wx.EVT_TEXT, self.onChangeInput)
         self.OptionsInfo = wx.TextCtrl ( self, -1,'', size=(-1, -1), style=wx.TE_MULTILINE | wx.TE_READONLY )
         
         OptSideBarSizer.Add(self.OptionsTree, 5, wx.EXPAND | wx.ALL, 1 )
@@ -353,7 +354,7 @@ class OptionSideBar(wx.Panel):
         When we change the value of the var in the combobox
         """
         vv = ''
-        
+
         if self.SelVarType == 'text':
             vv = self.OptionsInput.GetValue()
             customUserConfig[self.SelPan][self.SelVar][2] = [vv]
