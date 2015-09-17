@@ -82,7 +82,7 @@ class Panel(PlotGrid):
         len_sleep_episodes_night = all_sleep_episodes (s5, 721, 1440)
         num_sleep_episodes_day = number_sleep_episodes (s5, 0, 720)
         num_sleep_episodes_night = number_sleep_episodes (s5, 721, 1440)
-        latency = sleep_latency(s5, 720)
+        latency = sleep_latency(s5, lightsoff=720)
 
         longest_sleep_episode = max( len_sleep_episodes_night )
         frag_factor = 1

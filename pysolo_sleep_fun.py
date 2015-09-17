@@ -149,10 +149,10 @@ def sleep_latency(s5, lightsoff=720):
     """
     returns sleep latency in minutes, that is time between lights off and first recorded sleep episode of at least 5 minutes
     """
-    grid = np.indices(s5.shape)[2] # compile a grid containing the indices of the array
+    grid = np.indices(s5.shape)[-1] # compile a grid containing the indices of the array
     k = grid * s5 # keep only the indices where s5 is 1
     
-    sl = np.argmax(k > lightsoff, axis=2) - lightsoff
+    sl = np.argmax(k > lightsoff, axis=-1) - lightsoff
     return np.ma.masked_less(sl, 0)
     
 

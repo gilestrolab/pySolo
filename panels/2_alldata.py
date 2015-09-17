@@ -17,11 +17,11 @@ class Panel(GridGrid):
 
         PanelProportion = [2,6]
         
-        sfLabels = ['Genotype', 'Day', 'Mon', 'Ch', 'alive', 'totSleep', 'rDS', 'rNS', 'AI', 'rD aLSE', 'rD aNSE', 'rN aLSE', 'rN aNSE']
-        sfdataTypes = [gridlib.GRID_VALUE_STRING] * 4 + [gridlib.GRID_VALUE_NUMBER] *1 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 8
+        sfLabels = ['Genotype', 'Day', 'Mon', 'Ch', 'alive', 'totSleep', 'rDS', 'rNS', 'AI', 'rD aLSE', 'rD aNSE', 'rN aLSE', 'rN aNSE', 'latency']
+        sfdataTypes = [gridlib.GRID_VALUE_STRING] * 4 + [gridlib.GRID_VALUE_NUMBER] *1 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 10
         
-        AVGLabels = ['Genotype', 'Day', 'Mon', 'n(tot)','n(a)' , 'DaySleep', 'stdDV' ,'rDS', 'stdDV' ,'rNS', 'stdDV' , 'AI', 'stdDV']
-        AVGdataTypes = [gridlib.GRID_VALUE_STRING] * 3 + [gridlib.GRID_VALUE_NUMBER] *2 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 8
+        AVGLabels = ['Genotype', 'Day', 'Mon', 'n(tot)','n(a)' , 'DaySleep', 'stdDV' ,'rDS', 'stdDV' ,'rNS', 'stdDV' , 'AI', 'stdDV', 'latency', 'stdDV']
+        AVGdataTypes = [gridlib.GRID_VALUE_STRING] * 3 + [gridlib.GRID_VALUE_NUMBER] *2 + [gridlib.GRID_VALUE_FLOAT + ':6,2'] * 10
         
         GridGrid.__init__(self, parent, PanelProportion, [AVGLabels, sfLabels], [AVGdataTypes, sfdataTypes])
         self.name = 'All Data'
@@ -75,6 +75,7 @@ class Panel(GridGrid):
                     len_sleep_episodes_night = all_sleep_episodes (s5_t[dc,fc], 721, 1440)
                     num_sleep_episodes_day = number_sleep_episodes (s5_t[dc,fc], 0, 720)
                     num_sleep_episodes_night = number_sleep_episodes (s5_t[dc,fc], 721, 1440)
+                    latency = sleep_latency(s5_t[dc,fc], lightsoff=720)
 
                     single_fly_data.append([gen_t, day_sl, mon_sl, ch_sl, alive,
                                         s5_t[dc,fc].sum(),
@@ -84,7 +85,8 @@ class Panel(GridGrid):
                                         average( len_sleep_episodes_day ),
                                         average( num_sleep_episodes_day ),
                                         average( len_sleep_episodes_night ),
-                                        average( num_sleep_episodes_night )
+                                        average( num_sleep_episodes_night ),
+                                        latency
                                         ])
 
             #Here we add data to the pool in case we are dealing with multiple selections
@@ -105,6 +107,7 @@ class Panel(GridGrid):
         dist_day_sleep_by_fly = average (SleepAmountByFly (s5, t0=0, t1=720), axis=0)
         dist_night_sleep_by_fly = average (SleepAmountByFly (s5, t0=720, t1=1440), axis=0)
         dist_AI_by_fly = average (ActivityIndexByFly(ax, s5), axis=0)
+        latency = sleep_latency(s5, 720)
         
         AVGdata = ( [list2str(genotype_set), list2str(day_set), list2str(mon_set),
                   num_flies, num_alive,
@@ -112,7 +115,8 @@ class Panel(GridGrid):
                   average(dist_day_sleep_by_fly), std(dist_day_sleep_by_fly),
                   average(dist_night_sleep_by_fly), std(dist_night_sleep_by_fly),
                   average(dist_AI_by_fly), std(dist_AI_by_fly),
-                  0,0,0,0,0,0
+                  average(latency),std(latency),
+                  0,0,0,0
                ]  )
 
         #this places the data in the table        
