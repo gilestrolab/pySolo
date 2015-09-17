@@ -133,9 +133,12 @@ class DAMslice(object):
             for fly in fc:
                 
                 sf_1 = np.array([( single_flies[fly][i:i+5].sum() <= inactivity ) for i in range (d*c)])
-                sf_2 = np.array([( single_flies[fly][i-5:i].sum() <= inactivity ) for i in range (d*c)])
+                sf_2 = np.array([( single_flies[fly][i-1:i+4].sum() <= inactivity ) for i in range (d*c)])
+                sf_3 = np.array([( single_flies[fly][i-2:i+3].sum() <= inactivity ) for i in range (d*c)])
+                sf_4 = np.array([( single_flies[fly][i-3:i+2].sum() <= inactivity ) for i in range (d*c)])
+                sf_5 = np.array([( single_flies[fly][i-4:i+1].sum() <= inactivity ) for i in range (d*c)])
 
-                single_flies5min[fly] = sf_1 + sf_2
+                single_flies5min[fly] = sf_1 + sf_2 + sf_3 + sf_4 + sf_5
 
                 single_flies30min[fly]  = [ single_flies5min[fly][i-b2:i+a2].sum() for i in range (d*c)]
 
