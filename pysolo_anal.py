@@ -220,12 +220,12 @@ class ExportVariableSideBar(wx.Panel):
             ax_t, s5_t, s30_t = cSEL.filterbyStatus(ds,de,fs,fe,t0,t1, status=5, use_dropout=use_dropout, min_alive=min_alive, max_alive=max_alive)  #get the S5 of the currently selected item
 
             if n_sel == 0:
-                v[0] = s5_t
-                v[1] = ax_t
+                v[0] = ax_t
+                v[1] = s5_t
                 v[2] = s30_t
             else:
-                v[0] = concatenate ((v[0], s5_t))
-                v[1] = concatenate ((v[1], ax_t))
+                v[0] = concatenate ((v[1], ax_t))
+                v[1] = concatenate ((v[0], s5_t))
                 v[2] = concatenate ((v[2], s30_t))
         
         #Export now
