@@ -6,11 +6,15 @@ pySolo is a multiplatform software for analysis of sleep and locomotor activity 
 Software and documentation are located at http://www.pysolo.net. pySolo is a free software released under the GNU General Public License.
 
 Requires:
-    * python 2.x
-    * wxpython
-    * matplotlib
-    * numpy
-    * scipy
+    * python 2.7
+    * wxpython 3.0
+    * matplotlib 1.4.3
+    * numpy 1.9.2
+    * scipy 0.16.0
     
     
 See http://www.pysolo.net for more information
+
+
+pySolo is obsolete and has not been updated in year. It does still works fine if you provide the proper libraries.
+The easies way to use it is to adopt the exe installer, available on the website. However, the installer sometimes fails in modern windows installations and does not create two key subdirectories: `img` and `panels`. You may have to manually create those two subfolder and manually transfer the appropriate files therein.
